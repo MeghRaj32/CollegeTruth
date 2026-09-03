@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Student Reviews — CollegeTruth</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: white;
+        }
+
+        nav {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8%;
+            border-bottom: 1px solid #20283d;
+        }
+
+        .logo {
+            color: #6ea8fe;
+            font-size: 25px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: #d7dbea;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            color: #6ea8fe;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 70px 25px;
+        }
+
+        .back {
+            color: #7daeff;
+            text-decoration: none;
+        }
+
+        .heading {
+            text-align: center;
+            margin: 35px 0 50px;
+        }
+
+        .heading h1 {
+            font-size: 45px;
+            margin-bottom: 15px;
+        }
+
+        .heading h1 span {
+            color: #6ea8fe;
+        }
+
+        .heading p {
+            color: #9da7bd;
+            font-size: 17px;
+        }
+
+        .review-card {
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .college-name {
+            color: #6ea8fe;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .review-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .author {
+            color: #8f99ae;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .rating {
+            color: #ffd166;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .review-text {
+            color: #c1c8d8;
+            line-height: 1.7;
+        }
+
+        .recommend {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 7px 12px;
+            border-radius: 20px;
+            background: #17213b;
+            color: #7daeff;
+            font-size: 13px;
+        }
+
+        .view-college {
+            display: inline-block;
+            margin-top: 18px;
+            margin-left: 10px;
+            padding: 7px 12px;
+            border-radius: 20px;
+            background: #1d2b4c;
+            color: #7daeff;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 18px;
+            color: #9da7bd;
+        }
+
+        @media(max-width:700px) {
+
+            nav {
+                padding: 0 5%;
+            }
+
+            .nav-links {
+                gap: 10px;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+            }
+
+            .heading h1 {
+                font-size: 34px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<nav>
+
+    <a href="/" class="logo">
+        CollegeTruth 🎓
+    </a>
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/colleges">
+            Explore Colleges
+        </a>
+
+        <a href="/reviews">
+            Reviews
+        </a>
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+        <a href="/logout">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+
+    <a href="/" class="back">
+        ← Back to Home
+    </a>
+
+
+    <div class="heading">
+
+        <h1>
+            Student <span>Reviews</span>
+        </h1>
+
+        <p>
+            Real experiences from students.
+        </p>
+
+    </div>
+
+
+    {% if reviews %}
+
+
+        {% for review in reviews %}
+
+
+            <div class="review-card">
+
+
+                <div class="college-name">
+
+                    🏫 {{ review[2] }}
+
+                </div>
+
+
+                <div class="review-title">
+
+                    {{ review[3] }}
+
+                </div>
+
+
+                <div class="author">
+
+                    👤 {{ review[4] }}
+
+                </div>
+
+
+                <div class="rating">
+
+                    ⭐ {{ review[5] }}/5
+
+                </div>
+
+
+                <div class="review-text">
+
+                    {{ review[6] }}
+
+                </div>
+
+
+                {% if review[7] == 1 %}
+
+                    <div class="recommend">
+
+                        👍 Recommends this college
+
+                    </div>
+
+                {% else %}
+
+                    <div class="recommend">
+
+                        👎 Does not recommend this college
+
+                    </div>
+
+                {% endif %}
+
+
+                <a
+                    href="/college/{{ review[1] }}"
+                    class="view-college"
+                >
+
+                    View College →
+
+                </a>
+
+
+            </div>
+
+
+        {% endfor %}
+
+
+    {% else %}
+
+
+        <div class="empty">
+
+            <h2>
+                No reviews yet
+            </h2>
+
+            <p style="margin-top:10px;">
+
+                Be the first student to share your experience.
+
+            </p>
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+</body>
+
+</html>

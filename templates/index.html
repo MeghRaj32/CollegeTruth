@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>CollegeTruth — Know Before You Join</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: white;
+        }
+
+        /* =========================
+           NAVIGATION
+        ========================= */
+
+        nav {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8%;
+            border-bottom: 1px solid #20283d;
+        }
+
+        .logo {
+            color: #6ea8fe;
+            font-size: 25px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: #d7dbea;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            color: #6ea8fe;
+        }
+
+        .user-name {
+            color: #6ea8fe;
+            font-weight: bold;
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            min-height: 650px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 30px;
+            background: #17213b;
+            color: #7db0ff;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 60px;
+            line-height: 1.1;
+            margin-bottom: 25px;
+        }
+
+        h1 span {
+            color: #6ea8fe;
+        }
+
+        .hero-description {
+            color: #aeb6cc;
+            font-size: 19px;
+            line-height: 1.6;
+            margin-bottom: 35px;
+        }
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        .search-box {
+            background: white;
+            padding: 8px;
+            border-radius: 15px;
+            display: flex;
+            max-width: 650px;
+            margin: auto;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 10px;
+        }
+
+        .search-box button {
+            border: none;
+            background: #3978e8;
+            color: white;
+            padding: 0 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .search-box button:hover {
+            background: #2867d7;
+        }
+
+        /* =========================
+           STATS
+        ========================= */
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 70px;
+            margin-top: 60px;
+        }
+
+        .stat h2 {
+            color: #6ea8fe;
+            font-size: 30px;
+        }
+
+        .stat p {
+            color: #aeb6cc;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        /* =========================
+           COLLEGES
+        ========================= */
+
+        .colleges {
+            padding: 80px 8%;
+            background: #0f1528;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .small-title {
+            color: #6ea8fe;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .section-heading h2 {
+            font-size: 38px;
+            margin-bottom: 12px;
+        }
+
+        .section-heading p {
+            color: #9da7bd;
+        }
+
+        /* =========================
+           COLLEGE GRID
+        ========================= */
+
+        .college-grid {
+            max-width: 1100px;
+            margin: auto;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(280px, 1fr)
+                );
+
+            gap: 25px;
+        }
+
+        /* =========================
+           COLLEGE CARD
+        ========================= */
+
+        .college-card {
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 18px;
+            padding: 25px;
+            transition: 0.3s ease;
+        }
+
+        .college-card:hover {
+            transform: translateY(-5px);
+            border-color: #3978e8;
+
+            box-shadow:
+                0 15px 35px
+                rgba(0, 0, 0, 0.25);
+        }
+
+        .college-icon {
+            width: 55px;
+            height: 55px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #1d2b4c;
+
+            border-radius: 14px;
+
+            font-size: 25px;
+
+            margin-bottom: 20px;
+        }
+
+        .college-info h3 {
+            font-size: 21px;
+            margin-bottom: 8px;
+        }
+
+        .location {
+            color: #7daeff;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            color: #9da7bd;
+            line-height: 1.5;
+            font-size: 14px;
+            min-height: 65px;
+        }
+
+        .college-card a {
+            text-decoration: none;
+        }
+
+        .college-card button {
+            margin-top: 18px;
+            width: 100%;
+            padding: 11px;
+
+            border: none;
+            border-radius: 9px;
+
+            background: #3978e8;
+            color: white;
+
+            cursor: pointer;
+
+            font-weight: bold;
+        }
+
+        .college-card button:hover {
+            background: #2867d7;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+
+            nav {
+                padding: 0 5%;
+            }
+
+            .nav-links {
+                gap: 12px;
+            }
+
+            .nav-links a {
+                font-size: 13px;
+            }
+
+            h1 {
+                font-size: 42px;
+            }
+
+            .stats {
+                gap: 25px;
+            }
+
+            .colleges {
+                padding: 60px 5%;
+            }
+
+            .section-heading h2 {
+                font-size: 30px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         NAVIGATION
+    ========================= -->
+
+    <nav>
+
+        <a href="/" class="logo">
+            CollegeTruth 🎓
+        </a>
+
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/colleges">
+                Explore Colleges
+            </a>
+
+            <a href="/reviews">
+                Reviews
+            </a>
+
+            <a href="/dashboard">
+                👤 Dashboard
+            </a>
+
+            <a href="/login">
+                Login
+            </a>
+
+            <a href="/register">
+                Register
+            </a>
+
+            <a href="/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =========================
+         HERO
+    ========================= -->
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+
+            <div class="badge">
+                🔎 Student-powered college reviews
+            </div>
+
+
+            <h1>
+
+                Know the <span>truth</span><br>
+
+                before you join.
+
+            </h1>
+
+
+            <p class="hero-description">
+
+                Real experiences. Honest reviews.
+
+                Discover what college life is actually like
+                from the students who live it.
+
+            </p>
+
+
+            <!-- SEARCH -->
+
+            <form
+                class="search-box"
+                action="/search"
+                method="GET"
+            >
+
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search your college..."
+                    required
+                >
+
+                <button type="submit">
+                    Search
+                </button>
+
+            </form>
+
+
+            <!-- STATS -->
+
+            <div class="stats">
+
+
+                <div class="stat">
+
+                    <h2>
+                        {{ colleges|length }}+
+                    </h2>
+
+                    <p>
+                        Colleges
+                    </p>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <h2>
+                        {{ total_reviews }}+
+                    </h2>
+
+                    <p>
+                        Student Reviews
+                    </p>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <h2>
+                        100%
+                    </h2>
+
+                    <p>
+                        Student Voice
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         COLLEGES
+    ========================= -->
+
+    <section
+        class="colleges"
+        id="colleges"
+    >
+
+
+        <div class="section-heading">
+
+            <p class="small-title">
+                EXPLORE
+            </p>
+
+            <h2>
+                Colleges on CollegeTruth
+            </h2>
+
+            <p>
+                See what students have to say about their college.
+            </p>
+
+        </div>
+
+
+        <div class="college-grid">
+
+
+            {% for college in colleges %}
+
+
+                <div class="college-card">
+
+
+                    <div class="college-icon">
+                        🏫
+                    </div>
+
+
+                    <div class="college-info">
+
+
+                        <h3>
+                            {{ college[1] }}
+                        </h3>
+
+
+                        <p class="location">
+
+                            📍
+                            {{ college[2] }},
+                            {{ college[3] }}
+
+                        </p>
+
+
+                        <p class="description">
+
+                            {{ college[4] }}
+
+                        </p>
+
+
+                        <a
+                            href="/college/{{ college[0] }}"
+                        >
+
+                            <button>
+                                View College
+                            </button>
+
+                        </a>
+
+
+                    </div>
+
+
+                </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+
+    </section>
+
+
+</body>
+
+</html>

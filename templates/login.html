@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | CollegeTruth</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 80px auto;
+            padding: 25px;
+        }
+
+        .back {
+            color: #7daeff;
+            text-decoration: none;
+        }
+
+        .card {
+            margin-top: 30px;
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 20px;
+            padding: 35px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #9da7bd;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d7dbea;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            margin-bottom: 20px;
+            border: 1px solid #303b58;
+            border-radius: 9px;
+            background: #0f1528;
+            color: white;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #3978e8;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 9px;
+            background: #3978e8;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2867d7;
+        }
+
+        .register {
+            text-align: center;
+            margin-top: 20px;
+            color: #9da7bd;
+        }
+
+        .register a {
+            color: #7daeff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a class="back" href="/">
+        ← Back to CollegeTruth
+    </a>
+
+    <div class="card">
+
+        <h1>Welcome back 👋</h1>
+
+        <p class="subtitle">
+            Login to share your college experience anonymously.
+        </p>
+
+        <form method="POST">
+
+            <label>Email</label>
+
+            <input
+                type="email"
+                name="email"
+                placeholder="your@email.com"
+                required
+            >
+
+            <label>Password</label>
+
+            <input
+                type="password"
+                name="password"
+                placeholder="Your password"
+                required
+            >
+
+            <button type="submit">
+                Login
+            </button>
+
+        </form>
+
+        <div class="register">
+            Don't have an account?
+            <a href="/register">Create one</a>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

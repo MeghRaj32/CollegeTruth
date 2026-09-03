@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Verify Email — CollegeTruth</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+
+            min-height: 100vh;
+
+            background: #0b1020;
+
+            color: white;
+
+            font-family: Arial, sans-serif;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+        }
+
+        .card {
+
+            width: 100%;
+
+            max-width: 450px;
+
+            background: #151d33;
+
+            border: 1px solid #26314d;
+
+            border-radius: 20px;
+
+            padding: 40px;
+
+            text-align: center;
+
+            box-shadow:
+                0 20px 50px
+                rgba(0, 0, 0, 0.35);
+        }
+
+        .icon {
+
+            width: 75px;
+
+            height: 75px;
+
+            margin: 0 auto 25px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: #1d2b4c;
+
+            border-radius: 50%;
+
+            font-size: 35px;
+        }
+
+        h1 {
+
+            font-size: 30px;
+
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+
+            color: #9da7bd;
+
+            line-height: 1.6;
+
+            margin-bottom: 25px;
+        }
+
+        .email {
+
+            color: #6ea8fe;
+
+            font-weight: bold;
+
+            word-break: break-word;
+        }
+
+        .message {
+
+            background: #162d26;
+
+            border: 1px solid #27533f;
+
+            color: #7ee2b8;
+
+            padding: 12px;
+
+            border-radius: 10px;
+
+            margin-bottom: 20px;
+
+            font-size: 14px;
+        }
+
+        .error {
+
+            background: #3a1d2a;
+
+            border: 1px solid #542538;
+
+            color: #ff8f8f;
+
+            padding: 12px;
+
+            border-radius: 10px;
+
+            margin-bottom: 20px;
+
+            font-size: 14px;
+        }
+
+        input {
+
+            width: 100%;
+
+            padding: 16px;
+
+            border-radius: 10px;
+
+            border: 1px solid #34405d;
+
+            background: #0f1528;
+
+            color: white;
+
+            outline: none;
+
+            font-size: 24px;
+
+            text-align: center;
+
+            letter-spacing: 8px;
+
+            margin-bottom: 20px;
+        }
+
+        input:focus {
+
+            border-color: #3978e8;
+        }
+
+        .verify-btn {
+
+            width: 100%;
+
+            border: none;
+
+            padding: 14px;
+
+            border-radius: 10px;
+
+            background: #3978e8;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .verify-btn:hover {
+
+            background: #2867d7;
+        }
+
+        .resend {
+
+            margin-top: 20px;
+
+            color: #9da7bd;
+        }
+
+        .resend button {
+
+            background: none;
+
+            border: none;
+
+            color: #6ea8fe;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            font-weight: bold;
+        }
+
+        .back {
+
+            display: block;
+
+            margin-top: 20px;
+
+            color: #8f99ae;
+
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+        .back:hover {
+
+            color: #6ea8fe;
+        }
+
+        .expiry {
+
+            margin-top: 20px;
+
+            color: #8f99ae;
+
+            font-size: 13px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="card">
+
+
+    <div class="icon">
+        📧
+    </div>
+
+
+    <h1>
+        Verify Your Email
+    </h1>
+
+
+    <p class="subtitle">
+
+        We've sent a 6-digit verification
+        code to
+
+        <br>
+
+        <span class="email">
+            {{ email }}
+        </span>
+
+    </p>
+
+
+    {% if error %}
+
+        {% if "sent" in error %}
+
+            <div class="message">
+                {{ error }}
+            </div>
+
+        {% else %}
+
+            <div class="error">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+    {% endif %}
+
+
+    <form
+        action="/verify-otp"
+        method="POST"
+    >
+
+        <input
+            type="text"
+            name="otp"
+            placeholder="000000"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            required
+        >
+
+
+        <button
+            type="submit"
+            class="verify-btn"
+        >
+
+            Verify Email
+
+        </button>
+
+    </form>
+
+
+    <div class="resend">
+
+        Didn't receive the code?
+
+        <form
+            action="/resend-otp"
+            method="POST"
+            style="display:inline;"
+        >
+
+            <button type="submit">
+                Resend OTP
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="expiry">
+
+        ⏱️ OTP expires after 5 minutes.
+
+    </div>
+
+
+    <a
+        href="/register"
+        class="back"
+    >
+
+        ← Start registration again
+
+    </a>
+
+
+</div>
+
+
+</body>
+
+</html>

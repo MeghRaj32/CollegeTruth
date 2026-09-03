@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Explore Colleges — CollegeTruth</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: white;
+        }
+
+        nav {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8%;
+            border-bottom: 1px solid #20283d;
+        }
+
+        .logo {
+            color: #6ea8fe;
+            font-size: 25px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: #d7dbea;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            color: #6ea8fe;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: auto;
+            padding: 70px 25px;
+        }
+
+        .back {
+            color: #7daeff;
+            text-decoration: none;
+        }
+
+        .heading {
+            text-align: center;
+            margin: 35px 0 50px;
+        }
+
+        .heading h1 {
+            font-size: 45px;
+            margin-bottom: 15px;
+        }
+
+        .heading h1 span {
+            color: #6ea8fe;
+        }
+
+        .heading p {
+            color: #9da7bd;
+            font-size: 17px;
+        }
+
+        .college-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .college-card {
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 18px;
+            padding: 25px;
+            transition: 0.3s;
+        }
+
+        .college-card:hover {
+            transform: translateY(-5px);
+            border-color: #3978e8;
+            box-shadow:
+                0 15px 35px
+                rgba(0, 0, 0, 0.3);
+        }
+
+        .icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1d2b4c;
+            border-radius: 15px;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .college-card h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .location {
+            color: #7daeff;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            color: #9da7bd;
+            line-height: 1.6;
+            min-height: 70px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #26314d;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat strong {
+            display: block;
+            color: #6ea8fe;
+            font-size: 20px;
+        }
+
+        .stat span {
+            color: #8f99ae;
+            font-size: 12px;
+        }
+
+        .view-btn {
+            display: block;
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            text-align: center;
+            background: #3978e8;
+            color: white;
+            text-decoration: none;
+            border-radius: 9px;
+            font-weight: bold;
+        }
+
+        .view-btn:hover {
+            background: #2867d7;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px;
+            background: #151d33;
+            border-radius: 15px;
+            color: #9da7bd;
+        }
+
+        @media(max-width:700px) {
+
+            nav {
+                padding: 0 5%;
+            }
+
+            .nav-links {
+                gap: 10px;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+            }
+
+            .heading h1 {
+                font-size: 34px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<nav>
+
+    <a href="/" class="logo">
+        CollegeTruth 🎓
+    </a>
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
+        </a>
+
+        <a href="/colleges">
+            Explore Colleges
+        </a>
+
+        <a href="/reviews">
+            Reviews
+        </a>
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+        <a href="/logout">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+
+    <a href="/" class="back">
+        ← Back to Home
+    </a>
+
+
+    <div class="heading">
+
+        <h1>
+            Explore <span>Colleges</span>
+        </h1>
+
+        <p>
+            Discover colleges and see what students really think.
+        </p>
+
+    </div>
+
+
+    {% if colleges %}
+
+
+        <div class="college-grid">
+
+
+            {% for college in colleges %}
+
+
+                <div class="college-card">
+
+
+                    <div class="icon">
+                        🏫
+                    </div>
+
+
+                    <h2>
+                        {{ college[1] }}
+                    </h2>
+
+
+                    <div class="location">
+
+                        📍
+                        {{ college[2] }},
+                        {{ college[3] }}
+
+                    </div>
+
+
+                    <p class="description">
+
+                        {{ college[4] }}
+
+                    </p>
+
+
+                    <div class="stats">
+
+
+                        <div class="stat">
+
+                            <strong>
+                                {{ college[5] }}
+                            </strong>
+
+                            <span>
+                                Reviews
+                            </span>
+
+                        </div>
+
+
+                        <div class="stat">
+
+                            <strong>
+                                {{ college[6] }}
+                            </strong>
+
+                            <span>
+                                Rating
+                            </span>
+
+                        </div>
+
+
+                        <div class="stat">
+
+                            <strong>
+                                {{ college[7] }}%
+                            </strong>
+
+                            <span>
+                                Recommend
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <a
+                        href="/college/{{ college[0] }}"
+                        class="view-btn"
+                    >
+                        View College
+                    </a>
+
+
+                </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+
+    {% else %}
+
+
+        <div class="empty">
+
+            <h2>
+                No colleges found
+            </h2>
+
+            <p style="margin-top:10px;">
+                Colleges will appear here when they are added.
+            </p>
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+</body>
+
+</html>

@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ college[1] }} | CollegeTruth</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b1020;
+            color: white;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 50px 25px;
+        }
+
+        .back {
+            color: #7daeff;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .back:hover {
+            color: #6ea8fe;
+        }
+
+        /* COLLEGE HEADER */
+
+        .college-header {
+            margin-top: 35px;
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 20px;
+            padding: 40px;
+        }
+
+        .icon {
+            font-size: 50px;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin: 15px 0 10px;
+        }
+
+        .location {
+            color: #7daeff;
+            font-size: 17px;
+        }
+
+        .description {
+            color: #aab4ca;
+            line-height: 1.7;
+            margin-top: 25px;
+        }
+
+        /* RATING SUMMARY */
+
+        .rating-summary {
+            margin-top: 30px;
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 20px;
+            padding: 30px;
+
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 35px;
+        }
+
+        .overall-rating {
+            background: #10182c;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .overall-number {
+            font-size: 52px;
+            font-weight: bold;
+            color: #6ea8fe;
+        }
+
+        .stars {
+            font-size: 22px;
+            margin: 8px 0;
+        }
+
+        .overall-rating p {
+            margin: 5px 0;
+            font-weight: bold;
+        }
+
+        .overall-rating small {
+            color: #8f99b0;
+        }
+
+        .category-ratings {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rating-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background: #10182c;
+            padding: 11px 15px;
+            border-radius: 9px;
+        }
+
+        .rating-row span {
+            color: #c1c8d8;
+        }
+
+        .rating-row strong {
+            color: #7daeff;
+        }
+
+        .recommendation {
+            margin-top: 8px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #17213b;
+            color: #aab4ca;
+        }
+
+        .recommendation strong {
+            color: #6ea8fe;
+            font-size: 18px;
+        }
+
+        /* MESSAGES */
+
+        .duplicate-message {
+            margin-top: 30px;
+            padding: 18px 20px;
+            border-radius: 12px;
+            background: #2a1f12;
+            border: 1px solid #6b4d1f;
+            color: #ffd98a;
+            font-weight: bold;
+            line-height: 1.6;
+        }
+
+        /* REVIEW FORM */
+
+        .review-box {
+            margin-top: 30px;
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 20px;
+            padding: 35px;
+        }
+
+        .review-box h2 {
+            margin-top: 0;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #9da7bd;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 13px;
+            border-radius: 9px;
+            border: 1px solid #303d5c;
+            background: #0f172b;
+            color: white;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #3978e8;
+        }
+
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        .ratings {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .rating-item {
+            background: #10182c;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .rating-item label {
+            font-size: 14px;
+        }
+
+        .submit-btn {
+            margin-top: 25px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #3978e8;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #2867d7;
+        }
+
+        .login-message {
+            margin-top: 30px;
+            padding: 20px;
+            background: #10182c;
+            border-radius: 12px;
+            color: #aab4ca;
+        }
+
+        .login-message a {
+            color: #7daeff;
+            text-decoration: none;
+        }
+
+        /* REVIEWS */
+
+        .reviews-section {
+            margin-top: 40px;
+        }
+
+        .reviews-section h2 {
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+
+        .review-card {
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .review-title {
+            font-size: 21px;
+            margin-bottom: 8px;
+        }
+
+        .review-author {
+            color: #7daeff;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .review-text {
+            color: #c1c8d8;
+            line-height: 1.6;
+        }
+
+        /* EDIT DELETE */
+
+        .review-actions {
+            margin-top: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #26314d;
+        }
+
+        .edit-btn {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 8px;
+            background: #1d2b4c;
+            color: #7daeff;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+
+        .edit-btn:hover {
+            background: #263a63;
+        }
+
+        .delete-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            background: #3a1d2a;
+            color: #ff8f8f;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            background: #542538;
+        }
+
+        /* REVIEW RATINGS */
+
+        .rating-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .rating-box {
+            background: #10182c;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            color: #aab4ca;
+        }
+
+        .rating-box strong {
+            display: block;
+            color: #7daeff;
+            font-size: 17px;
+            margin-top: 4px;
+        }
+
+        .recommend {
+            margin-top: 15px;
+            color: #9da7bd;
+        }
+
+        .empty {
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 15px;
+            padding: 25px;
+            color: #9da7bd;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .container {
+                padding: 35px 18px;
+            }
+
+            .college-header,
+            .review-box {
+                padding: 25px;
+            }
+
+            .rating-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .ratings {
+                grid-template-columns: 1fr;
+            }
+
+            .rating-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .overall-number {
+                font-size: 45px;
+            }
+        }
+        .college-rating {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.rating {
+    color: #ffd166;
+    font-weight: bold;
+}
+
+.review-count {
+    color: #9da7bd;
+    font-size: 13px;
+}
+
+.recommendation {
+    margin-top: 8px;
+    color: #78d6a3;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- BACK -->
+
+    <a href="/" class="back">
+        ← Back to CollegeTruth
+    </a>
+
+
+    <!-- COLLEGE INFORMATION -->
+
+    <div class="college-header">
+
+        <div class="icon">
+            🏫
+        </div>
+
+        <h1>
+            {{ college[1] }}
+        </h1>
+
+        <div class="location">
+            📍 {{ college[2] }}, {{ college[3] }}
+        </div>
+
+        <p class="description">
+            {{ college[4] }}
+        </p>
+        <div class="college-rating">
+
+    <span class="rating">
+        ⭐ {{ college[6] }}
+    </span>
+
+    <span class="review-count">
+        📝 {{ college[5] }} reviews
+    </span>
+
+</div>
+
+<div class="recommendation">
+    👍 {{ college[7] }}% students recommend
+</div>
+
+    </div>
+
+
+    <!-- RATING SUMMARY -->
+
+    <div class="rating-summary">
+
+        <div class="overall-rating">
+
+            <div class="overall-number">
+                {{ ratings.overall }}
+            </div>
+
+            <div class="stars">
+
+                {% if ratings.overall >= 4.5 %}
+                    ⭐⭐⭐⭐⭐
+
+                {% elif ratings.overall >= 3.5 %}
+                    ⭐⭐⭐⭐☆
+
+                {% elif ratings.overall >= 2.5 %}
+                    ⭐⭐⭐☆☆
+
+                {% elif ratings.overall >= 1.5 %}
+                    ⭐⭐☆☆☆
+
+                {% elif ratings.overall > 0 %}
+                    ⭐☆☆☆☆
+
+                {% else %}
+                    ☆☆☆☆☆
+                {% endif %}
+
+            </div>
+
+            <p>
+                Overall Rating
+            </p>
+
+            <small>
+                Based on {{ ratings.total_reviews }} review(s)
+            </small>
+
+        </div>
+
+
+        <div class="category-ratings">
+
+            <div class="rating-row">
+                <span>Teaching</span>
+                <strong>{{ ratings.teaching }}/5</strong>
+            </div>
+
+            <div class="rating-row">
+                <span>Placements</span>
+                <strong>{{ ratings.placements }}/5</strong>
+            </div>
+
+            <div class="rating-row">
+                <span>Infrastructure</span>
+                <strong>{{ ratings.infrastructure }}/5</strong>
+            </div>
+
+            <div class="rating-row">
+                <span>Faculty</span>
+                <strong>{{ ratings.faculty }}/5</strong>
+            </div>
+
+            <div class="rating-row">
+                <span>Campus Life</span>
+                <strong>{{ ratings.campus_life }}/5</strong>
+            </div>
+
+            <div class="rating-row">
+                <span>Hostel</span>
+                <strong>{{ ratings.hostel }}/5</strong>
+            </div>
+
+            <div class="rating-row">
+                <span>Canteen</span>
+                <strong>{{ ratings.canteen }}/5</strong>
+            </div>
+
+            <div class="recommendation">
+
+                👍
+                <strong>
+                    {{ ratings.recommend_percentage }}%
+                </strong>
+
+                of students recommend this college
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DUPLICATE REVIEW MESSAGE -->
+
+    {% if error == "already_reviewed" %}
+
+    <div class="duplicate-message">
+
+        ⚠️ You have already reviewed this college.
+
+        <br>
+
+        You can only submit one review per college.
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- REVIEW FORM -->
+
+    {% if logged_in %}
+
+    <div class="review-box">
+
+        <h2>
+            ✍️ Write a Review
+        </h2>
+
+        <p class="subtitle">
+            Share your real experience with other students.
+        </p>
+
+        <form
+            action="/college/{{ college[0] }}/review"
+            method="POST"
+        >
+
+            <div class="form-group">
+
+                <label>
+                    Review Title
+                </label>
+
+                <input
+                    type="text"
+                    name="title"
+                    placeholder="Example: Great college for computer science"
+                    maxlength="150"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Your Review
+                </label>
+
+                <textarea
+                    name="review_text"
+                    placeholder="Tell students about your actual experience..."
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <h3>
+                ⭐ Rate Your Experience
+            </h3>
+
+
+            <div class="ratings">
+
+                {% set rating_fields = [
+                    ("teaching", "Teaching"),
+                    ("placements", "Placements"),
+                    ("infrastructure", "Infrastructure"),
+                    ("faculty", "Faculty"),
+                    ("campus_life", "Campus Life"),
+                    ("hostel", "Hostel"),
+                    ("canteen", "Canteen"),
+                    ("overall", "Overall")
+                ] %}
+
+                {% for field, label_text in rating_fields %}
+
+                <div class="rating-item">
+
+                    <label>
+                        {{ label_text }}
+                    </label>
+
+                    <select name="{{ field }}" required>
+
+                        <option value="">
+                            Select
+                        </option>
+
+                        <option value="1">⭐ 1</option>
+                        <option value="2">⭐ 2</option>
+                        <option value="3">⭐ 3</option>
+                        <option value="4">⭐ 4</option>
+                        <option value="5">⭐ 5</option>
+
+                    </select>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div
+                class="form-group"
+                style="margin-top: 25px;"
+            >
+
+                <label>
+                    Would you recommend this college?
+                </label>
+
+                <select name="recommend" required>
+
+                    <option value="">
+                        Select
+                    </option>
+
+                    <option value="1">
+                        👍 Yes
+                    </option>
+
+                    <option value="0">
+                        👎 No
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+                Submit Review
+            </button>
+
+        </form>
+
+    </div>
+
+    {% else %}
+
+    <div class="login-message">
+
+        🔐 Want to share your experience?
+
+        <a href="/login">
+            Login
+        </a>
+
+        or
+
+        <a href="/register">
+            create an account
+        </a>
+
+        to write a review.
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- STUDENT REVIEWS -->
+
+    <div class="reviews-section">
+
+        <h2>
+            ⭐ Student Reviews
+        </h2>
+
+
+        {% if reviews %}
+
+            {% for review in reviews %}
+
+            <div class="review-card">
+
+                <div class="review-title">
+                    {{ review[1] }}
+                </div>
+
+
+                <div class="review-author">
+                    👤 {{ review[13] }}
+                </div>
+
+
+                <!-- EDIT / DELETE ONLY FOR OWNER -->
+
+                {% if logged_in and review[14] == session.get("user_id") %}
+
+                <div class="review-actions">
+
+                    <a
+                        href="{{ url_for('edit_review', review_id=review[0]) }}"
+                        class="edit-btn"
+                    >
+                        ✏️ Edit Review
+                    </a>
+
+
+                    <form
+                        action="{{ url_for('delete_review', review_id=review[0]) }}"
+                        method="POST"
+                        style="display: inline;"
+                        onsubmit="return confirm('Are you sure you want to delete this review?');"
+                    >
+
+                        <button
+                            type="submit"
+                            class="delete-btn"
+                        >
+                            🗑️ Delete Review
+                        </button>
+
+                    </form>
+
+                </div>
+
+                {% endif %}
+
+
+                <div class="review-text">
+                    {{ review[2] }}
+                </div>
+
+
+                <div class="rating-grid">
+
+                    <div class="rating-box">
+                        Teaching
+                        <strong>
+                            {{ review[3] }}/5
+                        </strong>
+                    </div>
+
+                    <div class="rating-box">
+                        Placements
+                        <strong>
+                            {{ review[4] }}/5
+                        </strong>
+                    </div>
+
+                    <div class="rating-box">
+                        Infrastructure
+                        <strong>
+                            {{ review[5] }}/5
+                        </strong>
+                    </div>
+
+                    <div class="rating-box">
+                        Faculty
+                        <strong>
+                            {{ review[6] }}/5
+                        </strong>
+                    </div>
+
+                    <div class="rating-box">
+                        Campus Life
+                        <strong>
+                            {{ review[7] }}/5
+                        </strong>
+                    </div>
+
+                    <div class="rating-box">
+                        Hostel
+                        <strong>
+                            {{ review[8] }}/5
+                        </strong>
+                    </div>
+
+                    <div class="rating-box">
+                        Canteen
+                        <strong>
+                            {{ review[9] }}/5
+                        </strong>
+                    </div>
+
+                    <div class="rating-box">
+                        Overall
+                        <strong>
+                            {{ review[10] }}/5
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                {% if review[11] == 1 %}
+
+                <div class="recommend">
+                    👍 Recommended by this student
+                </div>
+
+                {% else %}
+
+                <div class="recommend">
+                    👎 Not recommended by this student
+                </div>
+
+                {% endif %}
+
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+        <div class="empty">
+
+            No reviews yet.
+
+            Be the first student to share your experience!
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
