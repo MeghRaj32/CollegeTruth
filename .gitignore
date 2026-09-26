@@ -25,3 +25,4 @@ instance/
 # OS files
 .DS_Store
 Thumbs.db
+collegetruth_backup.sql
