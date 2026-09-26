@@ -346,45 +346,49 @@
 
     <nav>
 
-        <a href="/" class="logo">
-            CollegeTruth 🎓
+    <a href="/" class="logo">
+        CollegeTruth 🎓
+    </a>
+
+    <div class="nav-links">
+
+        <a href="/">
+            Home
         </a>
 
+        <a href="/colleges">
+            Explore Colleges
+        </a>
 
-        <div class="nav-links">
+        <a href="/reviews">
+            Reviews
+        </a>
 
-            <a href="/">
-                Home
+        <a href="/dashboard">
+            👤 Dashboard
+        </a>
+
+        {% if session.get("is_admin") %}
+            <a href="/admin" class="admin-link">
+                🛡️ Admin
             </a>
+        {% endif %}
 
-            <a href="/colleges">
-                Explore Colleges
-            </a>
+        <a href="/login">
+            Login
+        </a>
 
-            <a href="/reviews">
-                Reviews
-            </a>
+        <a href="/register">
+            Register
+        </a>
 
-            <a href="/dashboard">
-                👤 Dashboard
-            </a>
+        <a href="/logout">
+            Logout
+        </a>
 
-            <a href="/login">
-                Login
-            </a>
+    </div>
 
-            <a href="/register">
-                Register
-            </a>
-
-            <a href="/logout">
-                Logout
-            </a>
-
-        </div>
-
-    </nav>
-
+</nav>
 
     <!-- =========================
          HERO

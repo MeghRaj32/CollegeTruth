@@ -67,6 +67,25 @@ def ensure_schema():
 
 
             # -------------------------------------------------
+            # COLLEGES - LOCATION
+            # -------------------------------------------------
+
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM information_schema.columns
+                WHERE table_schema = %s
+                AND table_name = 'colleges'
+                AND column_name = 'location'
+            """, (config.DB_NAME,))
+
+            if cursor.fetchone()[0] == 0:
+                cursor.execute("""
+                    ALTER TABLE colleges
+                    ADD COLUMN location VARCHAR(255) NULL
+                """)
+
+
+            # -------------------------------------------------
             # COLLEGES - VERIFICATION STATUS
             # -------------------------------------------------
 
@@ -1799,7 +1818,6 @@ def verify_otp():
             "otp_user_id"
         )
 
-
         if not user_id:
 
             session.clear()
@@ -1808,6 +1826,28 @@ def verify_otp():
                 url_for("login")
             )
 
+        connection = get_db_connection()
+
+        try:
+
+            with connection.cursor() as cursor:
+
+                cursor.execute(
+                    """
+                    SELECT is_admin
+                    FROM users
+                    WHERE id = %s
+                    """,
+                    (
+                        user_id,
+                    )
+                )
+
+                user = cursor.fetchone()
+
+        finally:
+
+            connection.close()
 
         session.clear()
 
@@ -1819,10 +1859,14 @@ def verify_otp():
             anonymous_name
         )
 
+        session["is_admin"] = (
+            bool(user[0]) if user else False
+        )
 
         return redirect(
             url_for("home")
         )
+
 
 
     # ---------------------------------------------------------
@@ -2598,6 +2642,121 @@ def admin_verify_college(college_id):
         url_for(
             "admin_colleges"
         )
+    )
+
+
+# =========================================================
+# ADMIN REVIEW MANAGEMENT
+# =========================================================
+
+@app.route("/admin/reviews")
+def admin_reviews():
+    denied = admin_required()
+
+    if denied:
+        return denied
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    reviews.id,
+                    colleges.name,
+                    users.anonymous_name,
+                    reviews.title,
+                    reviews.review_text,
+                    reviews.teaching,
+                    reviews.placements,
+                    reviews.infrastructure,
+                    reviews.faculty,
+                    reviews.campus_life,
+                    reviews.hostel,
+                    reviews.canteen,
+                    reviews.overall,
+                    reviews.recommend,
+                    reviews.created_at
+
+                FROM reviews
+
+                JOIN colleges
+                    ON reviews.college_id = colleges.id
+
+                JOIN users
+                    ON reviews.user_id = users.id
+
+                ORDER BY reviews.created_at DESC
+                """
+            )
+
+            reviews = cursor.fetchall()
+
+    finally:
+        connection.close()
+
+    return render_template(
+        "admin_reviews.html",
+        reviews=reviews,
+        username=session.get("anonymous_name")
+    )
+
+
+# =========================================================
+# ADMIN DELETE REVIEW
+# =========================================================
+
+@app.route(
+    "/admin/reviews/<int:review_id>/delete",
+    methods=["POST"]
+)
+def admin_delete_review(review_id):
+    denied = admin_required()
+
+    if denied:
+        return denied
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT id
+                FROM reviews
+                WHERE id = %s
+                """,
+                (
+                    review_id,
+                )
+            )
+
+            review = cursor.fetchone()
+
+            if review is None:
+                return (
+                    "Review not found.",
+                    404
+                )
+
+            cursor.execute(
+                """
+                DELETE FROM reviews
+                WHERE id = %s
+                """,
+                (
+                    review_id,
+                )
+            )
+
+        connection.commit()
+
+    finally:
+        connection.close()
+
+    return redirect(
+        url_for("admin_reviews")
     )
 
 

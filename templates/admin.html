@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard - CollegeTruth</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #111827;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand {
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .admin-link {
+            color: #fbbf24 !important;
+            font-weight: bold;
+        }
+
+        .logout {
+            background: #dc2626;
+            padding: 8px 13px;
+            border-radius: 6px;
+            color: white !important;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .heading {
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            color: #111827;
+        }
+
+        .heading p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+        }
+
+        .stat-title {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 30px;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .action-card {
+            display: block;
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+            border: 1px solid #e5e7eb;
+        }
+
+        .action-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .action-card h3 {
+            margin: 0 0 7px;
+            color: #111827;
+        }
+
+        .action-card p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+        }
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 13px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            color: #374151;
+            font-size: 14px;
+            background: #f9fafb;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .verified {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .unverified {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .manage {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1000px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <a href="{{ url_for('home') }}" class="brand">CollegeTruth</a>
+
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="/colleges">Explore Colleges</a>
+        <a href="/reviews">Reviews</a>
+        <a href="/dashboard">Dashboard</a>
+
+        {% if session.get("is_admin") %}
+            <a href="/admin" class="admin-link">🛡️ Admin</a>
+        {% endif %}
+
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="heading">
+        <h1>Admin Dashboard</h1>
+        <p>
+            Welcome, {{ username or "Administrator" }}.
+            Manage CollegeTruth from here.
+        </p>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <div class="stat-title">Total Users</div>
+            <div class="stat-value">{{ user_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Total Colleges</div>
+            <div class="stat-value">{{ college_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Total Reviews</div>
+            <div class="stat-value">{{ review_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Administrators</div>
+            <div class="stat-value">{{ admin_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Verified Colleges</div>
+            <div class="stat-value">{{ verified_count }}</div>
+        </div>
+
+    </div>
+
+    <div class="actions">
+
+        <a href="{{ url_for('admin_colleges') }}" class="action-card">
+            <h3>🏫 Manage Colleges</h3>
+            <p>
+                View colleges and manage their verification status.
+            </p>
+        </a>
+
+        <a href="{{ url_for('admin_reviews') }}" class="action-card">
+            <h3>📝 Manage Reviews</h3>
+            <p>
+                Review submitted reviews and remove inappropriate content.
+            </p>
+        </a>
+
+        <a href="{{ url_for('admin_colleges') }}" class="action-card">
+            <h3>✓ College Verification</h3>
+            <p>
+                Verify colleges using documented verification sources.
+            </p>
+        </a>
+
+    </div>
+
+    <div class="section">
+
+        <h2>College Overview</h2>
+
+        {% if recent_colleges %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>College</th>
+                    <th>Status</th>
+                    <th>Reviews</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for college in recent_colleges %}
+
+                <tr>
+                    <td>{{ college[0] }}</td>
+
+                    <td>
+                        {{ college[1] }}
+                    </td>
+
+                    <td>
+                        {% set status = college[2] or "unverified" %}
+
+                        <span class="status {{ status }}">
+                            {{ status }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ college[3] }}
+                    </td>
+
+                    <td>
+                        <a
+                            href="{{ url_for('admin_verify_college', college_id=college[0]) }}"
+                            class="manage"
+                        >
+                            Manage
+                        </a>
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+        </table>
+
+        {% else %}
+
+            <p>No colleges found.</p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

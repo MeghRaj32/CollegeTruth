@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Verify College - CollegeTruth</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .navbar {
+            background: #111827;
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .nav-links a {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .admin-link {
+            color: #fbbf24 !important;
+            font-weight: bold;
+        }
+
+        .logout {
+            background: #dc2626;
+            padding: 8px 14px;
+            border-radius: 6px;
+            color: white !important;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .college-info {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .college-info p {
+            margin: 8px 0;
+        }
+
+        .college-name {
+            font-size: 21px;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        select:focus,
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        .help {
+            display: block;
+            margin-top: 6px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .save-btn {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .cancel-btn {
+            background: #e5e7eb;
+            color: #374151;
+            padding: 12px 22px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .cancel-btn:hover {
+            background: #d1d5db;
+        }
+
+        .verified-info {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 14px;
+            border-radius: 7px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 800px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            .card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+
+        <a href="{{ url_for('home') }}" class="brand">
+            CollegeTruth
+        </a>
+
+        <div class="nav-links">
+
+            <a href="{{ url_for('home') }}">
+                Home
+            </a>
+
+            <a href="/colleges">
+                Explore Colleges
+            </a>
+
+            <a href="/reviews">
+                Reviews
+            </a>
+
+            <a href="/dashboard">
+                Dashboard
+            </a>
+
+            {% if session.get("is_admin") %}
+                <a href="/admin" class="admin-link">
+                    🛡️ Admin
+                </a>
+            {% endif %}
+
+            <a href="{{ url_for('logout') }}" class="logout">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+
+        <a href="{{ url_for('admin_colleges') }}" class="back">
+            ← Back to Manage Colleges
+        </a>
+
+        <div class="card">
+
+            <h1>Verify / Manage College</h1>
+
+            <p class="subtitle">
+                Review the college information and update its verification status.
+            </p>
+
+
+            <!-- COLLEGE INFORMATION -->
+            <div class="college-info">
+
+                <p class="college-name">
+                    {{ college[1] }}
+                </p>
+
+                <p>
+                    <strong>College ID:</strong>
+                    {{ college[0] }}
+                </p>
+
+                <p>
+                    <strong>Location:</strong>
+                    {{ college[2] or "Not provided" }}
+                </p>
+
+            </div>
+
+
+            {% if college[3] == "verified" %}
+
+                <div class="verified-info">
+                    ✓ This college is currently marked as verified.
+                    {% if college[9] %}
+                        <br>
+                        <strong>Verified at:</strong> {{ college[9] }}
+                    {% endif %}
+                </div>
+
+            {% endif %}
+
+
+            <!-- VERIFICATION FORM -->
+            <form method="POST">
+
+                <!-- STATUS -->
+                <div class="form-group">
+
+                    <label for="verification_status">
+                        Verification Status
+                    </label>
+
+                    <select
+                        name="verification_status"
+                        id="verification_status"
+                        required
+                    >
+
+                        <option
+                            value="unverified"
+                            {% if college[3] == "unverified" %}selected{% endif %}
+                        >
+                            Unverified
+                        </option>
+
+                        <option
+                            value="pending"
+                            {% if college[3] == "pending" %}selected{% endif %}
+                        >
+                            Pending
+                        </option>
+
+                        <option
+                            value="verified"
+                            {% if college[3] == "verified" %}selected{% endif %}
+                        >
+                            Verified
+                        </option>
+
+                        <option
+                            value="rejected"
+                            {% if college[3] == "rejected" %}selected{% endif %}
+                        >
+                            Rejected
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- LEVEL -->
+                <div class="form-group">
+
+                    <label for="verification_level">
+                        Verification Level
+                    </label>
+
+                    <select
+                        name="verification_level"
+                        id="verification_level"
+                        required
+                    >
+
+                        <option
+                            value="0"
+                            {% if college[4] == 0 %}selected{% endif %}
+                        >
+                            Level 0 — Not Verified
+                        </option>
+
+                        <option
+                            value="1"
+                            {% if college[4] == 1 %}selected{% endif %}
+                        >
+                            Level 1 — Basic Verification
+                        </option>
+
+                        <option
+                            value="2"
+                            {% if college[4] == 2 %}selected{% endif %}
+                        >
+                            Level 2 — Strong Verification
+                        </option>
+
+                        <option
+                            value="3"
+                            {% if college[4] == 3 %}selected{% endif %}
+                        >
+                            Level 3 — Highest Verification
+                        </option>
+
+                    </select>
+
+                    <span class="help">
+                        Use a higher level only when stronger evidence is available.
+                    </span>
+
+                </div>
+
+
+                <!-- SOURCE -->
+                <div class="form-group">
+
+                    <label for="verification_source">
+                        Verification Source
+                    </label>
+
+                    <input
+                        type="text"
+                        name="verification_source"
+                        id="verification_source"
+                        value="{{ college[5] or '' }}"
+                        placeholder="Example: UGC official website"
+                    >
+
+                    <span class="help">
+                        Required when the status is set to Verified.
+                    </span>
+
+                </div>
+
+
+                <!-- SOURCE URL -->
+                <div class="form-group">
+
+                    <label for="verification_source_url">
+                        Verification Source URL
+                    </label>
+
+                    <input
+                        type="url"
+                        name="verification_source_url"
+                        id="verification_source_url"
+                        value="{{ college[6] or '' }}"
+                        placeholder="https://example.com"
+                    >
+
+                </div>
+
+
+                <!-- NOTES -->
+                <div class="form-group">
+
+                    <label for="verification_notes">
+                        Verification Notes
+                    </label>
+
+                    <textarea
+                        name="verification_notes"
+                        id="verification_notes"
+                        placeholder="Enter details about how the college was verified..."
+                    >{{ college[7] or '' }}</textarea>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+                <div class="buttons">
+
+                    <button
+                        type="submit"
+                        class="save-btn"
+                    >
+                        Save Verification
+                    </button>
+
+                    <a
+                        href="{{ url_for('admin_colleges') }}"
+                        class="cancel-btn"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
