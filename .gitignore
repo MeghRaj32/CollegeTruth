@@ -9,7 +9,7 @@ venv/
 env/
 
 # Sensitive configuration
-config.py
+
 
 # Environment files
 .env
