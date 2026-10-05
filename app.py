@@ -2051,6 +2051,10 @@ def resend_otp():
 # LOGIN
 # =========================================================
 
+# =========================================================
+# LOGIN
+# =========================================================
+
 @app.route(
     "/login",
     methods=["GET", "POST"]
@@ -2064,12 +2068,10 @@ def login():
             ""
         ).strip()
 
-
         password = request.form.get(
             "password",
             ""
         )
-
 
         connection = get_db_connection()
 
@@ -2083,10 +2085,9 @@ def login():
                         id,
                         email,
                         password_hash,
-                        anonymous_name
-
+                        anonymous_name,
+                        is_admin
                     FROM users
-
                     WHERE email = %s
                     """,
                     (
@@ -2121,90 +2122,31 @@ def login():
 
 
         # -----------------------------------------------------
-        # EVERY LOGIN REQUIRES OTP
+        # DIRECT LOGIN
+        # -----------------------------------------------------
+        # Login OTP is temporarily disabled.
+        # Registration OTP remains enabled.
         # -----------------------------------------------------
 
-        otp = generate_otp()
+        session.clear()
 
+        session["user_id"] = user[0]
 
-        session["otp_user_id"] = user[0]
+        session["email"] = user[1]
 
-        session["otp_email"] = user[1]
+        session["anonymous_name"] = user[3]
 
-        session["otp_username"] = user[3]
-
-        session["otp_code_hash"] = (
-            generate_password_hash(otp)
-        )
-
-        session["otp_created_at"] = (
-            time.time()
-        )
-
-        session["otp_purpose"] = "login"
-
-
-        try:
-
-            send_otp_email(
-                user[1],
-                otp,
-                purpose="login"
-            )
-
-        except Exception as error:
-
-            print(
-                "LOGIN OTP EMAIL ERROR:",
-                error
-            )
-
-            session.pop(
-                "otp_user_id",
-                None
-            )
-
-            session.pop(
-                "otp_email",
-                None
-            )
-
-            session.pop(
-                "otp_username",
-                None
-            )
-
-            session.pop(
-                "otp_code_hash",
-                None
-            )
-
-            session.pop(
-                "otp_created_at",
-                None
-            )
-
-            session.pop(
-                "otp_purpose",
-                None
-            )
-
-            return (
-                "Unable to send login OTP. Please check your Gmail settings.",
-                500
-            )
+        session["is_admin"] = bool(user[4])
 
 
         return redirect(
-            url_for("verify_otp")
+            url_for("home")
         )
 
 
     return render_template(
         "login.html"
     )
-
-
 # =========================================================
 # ADMIN DASHBOARD
 # =========================================================
