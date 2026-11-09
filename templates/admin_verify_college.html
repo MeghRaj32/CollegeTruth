@@ -275,29 +275,29 @@
             <div class="college-info">
 
                 <p class="college-name">
-                    {{ college[1] }}
+                    {{ college.get('name', 'Unknown college') }}
                 </p>
 
                 <p>
                     <strong>College ID:</strong>
-                    {{ college[0] }}
+                    {{ college.get('id') }}
                 </p>
 
                 <p>
                     <strong>Location:</strong>
-                    {{ college[2] or "Not provided" }}
+                    {{ college.get('location') or 'Not provided' }}
                 </p>
 
             </div>
 
 
-            {% if college[3] == "verified" %}
+            {% if college.get('verification_status', '')|string|trim|lower == 'verified' %}
 
                 <div class="verified-info">
                     ✓ This college is currently marked as verified.
-                    {% if college[9] %}
+                    {% if college.get('verified_at') %}
                         <br>
-                        <strong>Verified at:</strong> {{ college[9] }}
+                        <strong>Verified at:</strong> {{ college.get('verified_at') }}
                     {% endif %}
                 </div>
 
@@ -322,28 +322,28 @@
 
                         <option
                             value="unverified"
-                            {% if college[3] == "unverified" %}selected{% endif %}
+                            {% if college.get('verification_status', '')|string|trim|lower == 'unverified' %}selected{% endif %}
                         >
                             Unverified
                         </option>
 
                         <option
                             value="pending"
-                            {% if college[3] == "pending" %}selected{% endif %}
+                            {% if college.get('verification_status', '')|string|trim|lower == 'pending' %}selected{% endif %}
                         >
                             Pending
                         </option>
 
                         <option
                             value="verified"
-                            {% if college[3] == "verified" %}selected{% endif %}
+                            {% if college.get('verification_status', '')|string|trim|lower == 'verified' %}selected{% endif %}
                         >
                             Verified
                         </option>
 
                         <option
                             value="rejected"
-                            {% if college[3] == "rejected" %}selected{% endif %}
+                            {% if college.get('verification_status', '')|string|trim|lower == 'rejected' %}selected{% endif %}
                         >
                             Rejected
                         </option>
@@ -368,28 +368,28 @@
 
                         <option
                             value="0"
-                            {% if college[4] == 0 %}selected{% endif %}
+                            {% if college.get('verification_level')|int == 0 %}selected{% endif %}
                         >
                             Level 0 — Not Verified
                         </option>
 
                         <option
                             value="1"
-                            {% if college[4] == 1 %}selected{% endif %}
+                            {% if college.get('verification_level')|int == 1 %}selected{% endif %}
                         >
                             Level 1 — Basic Verification
                         </option>
 
                         <option
                             value="2"
-                            {% if college[4] == 2 %}selected{% endif %}
+                            {% if college.get('verification_level')|int == 2 %}selected{% endif %}
                         >
                             Level 2 — Strong Verification
                         </option>
 
                         <option
                             value="3"
-                            {% if college[4] == 3 %}selected{% endif %}
+                            {% if college.get('verification_level')|int == 3 %}selected{% endif %}
                         >
                             Level 3 — Highest Verification
                         </option>
@@ -414,7 +414,7 @@
                         type="text"
                         name="verification_source"
                         id="verification_source"
-                        value="{{ college[5] or '' }}"
+                        value="{{ college.get('verification_source') or '' }}"
                         placeholder="Example: UGC official website"
                     >
 
@@ -436,7 +436,7 @@
                         type="url"
                         name="verification_source_url"
                         id="verification_source_url"
-                        value="{{ college[6] or '' }}"
+                        value="{{ college.get('verification_source_url') or '' }}"
                         placeholder="https://example.com"
                     >
 
@@ -454,7 +454,7 @@
                         name="verification_notes"
                         id="verification_notes"
                         placeholder="Enter details about how the college was verified..."
-                    >{{ college[7] or '' }}</textarea>
+                    >{{ college.get('verification_notes') or '' }}</textarea>
 
                 </div>
 

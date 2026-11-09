@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>College Suggestions | CollegeTruth</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #111827;
+            color: white;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .navbar a.back {
+            color: white;
+            text-decoration: none;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+        }
+
+        .heading {
+            margin-bottom: 25px;
+        }
+
+        .heading h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .heading p {
+            color: #6b7280;
+        }
+
+        .stats {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .stats strong {
+            font-size: 26px;
+            color: #2563eb;
+        }
+
+        .message {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .suggestion-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+            border-left: 5px solid #2563eb;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .card-header h2 {
+            font-size: 21px;
+        }
+
+        .status {
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            height: fit-content;
+        }
+
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .approved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .details {
+            line-height: 1.8;
+            color: #4b5563;
+        }
+
+        .details strong {
+            color: #111827;
+        }
+
+        .details a {
+            color: #2563eb;
+            word-break: break-all;
+        }
+
+        .reason {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .actions form {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .actions input {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+        }
+
+        button {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .approve-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .reject-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        .approve-btn:hover {
+            background: #15803d;
+        }
+
+        .reject-btn:hover {
+            background: #b91c1c;
+        }
+
+        .admin-notes {
+            margin-top: 15px;
+            background: #f3f4f6;
+            padding: 13px;
+            border-radius: 7px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 12px;
+            color: #6b7280;
+        }
+
+        @media(max-width: 600px) {
+
+            .container {
+                width: 94%;
+            }
+
+            .suggestion-card {
+                padding: 18px;
+            }
+
+            .heading h1 {
+                font-size: 24px;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <a href="{{ url_for('admin_dashboard') }}" class="brand">
+            CollegeTruth Admin
+        </a>
+
+        <a href="{{ url_for('admin_dashboard') }}" class="back">
+            ← Back to Dashboard
+        </a>
+
+    </nav>
+
+
+    <main class="container">
+
+        <div class="heading">
+
+            <h1>College Suggestions</h1>
+
+            <p>
+                Review college suggestions submitted by students.
+            </p>
+
+        </div>
+
+
+        <div class="stats">
+
+            <strong>{{ pending_count }}</strong>
+
+            <p>Pending Suggestions</p>
+
+        </div>
+
+
+        {% if message %}
+
+            <div class="message {{ message_type }}">
+                {{ message }}
+            </div>
+
+        {% endif %}
+
+
+        {% if suggestions %}
+
+            {% for suggestion in suggestions %}
+
+                <div class="suggestion-card">
+
+                    <div class="card-header">
+
+                        <h2>
+                            {{ suggestion['college_name'] }}
+                        </h2>
+
+                        <span class="status {{ suggestion['status'] }}">
+                            {{ suggestion['status'] }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="details">
+
+                        <p>
+                            <strong>Suggestion ID:</strong>
+                            #{{ suggestion['id'] }}
+                        </p>
+
+                        <p>
+                            <strong>City:</strong>
+                            {{ suggestion['city'] }}
+                        </p>
+
+                        <p>
+                            <strong>State:</strong>
+                            {{ suggestion['state'] }}
+                        </p>
+
+                        <p>
+                            <strong>Submitted By (User ID):</strong>
+                            {{ suggestion['submitted_by'] or 'Guest' }}
+                        </p>
+
+                        <p>
+                            <strong>Submitted On:</strong>
+                            {{ suggestion['created_at'] }}
+                        </p>
+
+                        {% if suggestion['official_website'] %}
+
+                            <p>
+                                <strong>Official Website:</strong>
+
+                                <a href="{{ suggestion['official_website'] }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+
+                                    {{ suggestion['official_website'] }}
+
+                                </a>
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="reason">
+
+                        <strong>Reason for Suggestion</strong>
+
+                        <p>
+                            {{ suggestion['reason'] }}
+                        </p>
+
+                    </div>
+
+
+                    {% if suggestion['status'] == 'pending' %}
+
+                        <div class="actions">
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'admin_approve_suggestion',
+                                    suggestion_id=suggestion['id']
+                                ) }}"
+                                onsubmit="return confirm(
+                                    'Are you sure you want to approve this college?'
+                                );"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="approve-btn"
+                                >
+                                    ✓ Approve College
+                                </button>
+
+                            </form>
+
+
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'admin_reject_suggestion',
+                                    suggestion_id=suggestion['id']
+                                ) }}"
+                                onsubmit="return confirm(
+                                    'Are you sure you want to reject this suggestion?'
+                                );"
+                            >
+
+                                <input
+                                    type="text"
+                                    name="admin_notes"
+                                    placeholder="Reason for rejection"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="reject-btn"
+                                >
+                                    ✕ Reject
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="admin-notes">
+
+                            <strong>Admin Notes:</strong>
+
+                            <p>
+                                {{ suggestion['admin_notes'] or 'No notes provided.' }}
+                            </p>
+
+                            <p>
+                                <strong>Reviewed On:</strong>
+                                {{ suggestion['reviewed_at'] or 'Not available' }}
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+
+                <h2>No Suggestions Yet</h2>
+
+                <p>
+                    Student college suggestions will appear here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </main>
+
+</body>
+</html>

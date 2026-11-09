@@ -2,15 +2,12 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Manage Colleges - CollegeTruth</title>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -58,7 +55,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -103,18 +100,20 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 950px;
         }
 
         th {
             background: #f3f4f6;
             text-align: left;
-            padding: 15px;
+            padding: 16px;
             font-size: 14px;
             color: #374151;
+            white-space: nowrap;
         }
 
         td {
-            padding: 15px;
+            padding: 17px 16px;
             border-bottom: 1px solid #e5e7eb;
             vertical-align: middle;
         }
@@ -123,22 +122,30 @@
             border-bottom: none;
         }
 
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
         .college-name {
             font-weight: bold;
             color: #111827;
+            min-width: 180px;
         }
 
         .location {
             color: #6b7280;
         }
 
+        /* Verification badges */
+
         .status {
             display: inline-block;
-            padding: 6px 11px;
+            padding: 7px 12px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             text-transform: capitalize;
+            white-space: nowrap;
         }
 
         .status-verified {
@@ -161,19 +168,38 @@
             color: #374151;
         }
 
+        .verification-level {
+            display: block;
+            margin-top: 7px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .source {
+            color: #4b5563;
+            font-size: 13px;
+        }
+
+        .review-count {
+            white-space: nowrap;
+        }
+
         .verify-btn {
             display: inline-block;
             background: #2563eb;
             color: white;
             text-decoration: none;
-            padding: 9px 14px;
+            padding: 10px 15px;
             border-radius: 7px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
+            white-space: nowrap;
+            transition: 0.2s;
         }
 
         .verify-btn:hover {
             background: #1d4ed8;
+            transform: translateY(-1px);
         }
 
         .empty {
@@ -182,8 +208,11 @@
             color: #6b7280;
         }
 
-        @media (max-width: 800px) {
+        .empty h2 {
+            color: #374151;
+        }
 
+        @media (max-width: 800px) {
             nav {
                 padding: 15px 20px;
                 flex-direction: column;
@@ -200,11 +229,6 @@
                 align-items: flex-start;
                 gap: 15px;
             }
-
-            table {
-                min-width: 850px;
-            }
-
         }
 
     </style>
@@ -212,6 +236,8 @@
 </head>
 
 <body>
+
+    <!-- Navigation -->
 
     <nav>
 
@@ -221,21 +247,13 @@
 
         <div class="nav-links">
 
-            <a href="/">
-                Home
-            </a>
+            <a href="/">Home</a>
 
-            <a href="/colleges">
-                Explore Colleges
-            </a>
+            <a href="/colleges">Explore Colleges</a>
 
-            <a href="/reviews">
-                Reviews
-            </a>
+            <a href="/reviews">Reviews</a>
 
-            <a href="/dashboard">
-                👤 Dashboard
-            </a>
+            <a href="/dashboard">👤 Dashboard</a>
 
             {% if session.get("is_admin") %}
 
@@ -245,14 +263,14 @@
 
             {% endif %}
 
-            <a href="/logout">
-                Logout
-            </a>
+            <a href="/logout">Logout</a>
 
         </div>
 
     </nav>
 
+
+    <!-- Main Container -->
 
     <div class="container">
 
@@ -275,6 +293,8 @@
         </div>
 
 
+        <!-- Colleges Table -->
+
         <div class="table-card">
 
             {% if colleges %}
@@ -291,7 +311,7 @@
 
                             <th>Location</th>
 
-                            <th>Verification</th>
+                            <th>Verification Status</th>
 
                             <th>Source</th>
 
@@ -303,83 +323,140 @@
 
                     </thead>
 
+
                     <tbody>
 
                         {% for college in colleges %}
 
+                            {% set status = (college.get('verification_status') or 'unverified')|lower %}
+                            {% set level = college.get('verification_level', 0) %}
+
                             <tr>
 
+                                <!-- College ID -->
+
                                 <td>
-                                    {{ college[0] }}
+                                    {{ college.get('id') }}
                                 </td>
+
+
+                                <!-- College Name -->
 
                                 <td>
 
                                     <div class="college-name">
-                                        {{ college[1] }}
+                                        {{ college.get('name', 'Unnamed College') }}
                                     </div>
 
                                 </td>
+
+
+                                <!-- Location -->
 
                                 <td>
 
                                     <div class="location">
 
-                                        {% if college[2] %}
-                                            {{ college[2] }}
+                                        {% if college.get('location') %}
+
+                                            {{ college.get('location') }}
+
                                         {% else %}
+
                                             Not specified
+
                                         {% endif %}
 
                                     </div>
 
                                 </td>
 
+
+                                <!-- Verification Status -->
+
                                 <td>
 
-                                    <span class="status
-                                        {% if college[3] == 'verified' %}
-                                            status-verified
-                                        {% elif college[3] == 'pending' %}
-                                            status-pending
-                                        {% elif college[3] == 'rejected' %}
-                                            status-rejected
-                                        {% else %}
-                                            status-unverified
-                                        {% endif %}
-                                    ">
+                                    <span class="status status-{{ status }}">
 
-                                        {{ college[3] }}
+                                        {% if status == 'verified' %}
+
+                                            ✓ Verified
+
+                                        {% elif status == 'pending' %}
+
+                                            ◷ Pending
+
+                                        {% elif status == 'rejected' %}
+
+                                            ✕ Rejected
+
+                                        {% else %}
+
+                                            ○ Unverified
+
+                                        {% endif %}
 
                                     </span>
 
-                                </td>
+                                    {% if status == 'verified' and level %}
 
-                                <td>
-
-                                    {% if college[4] %}
-
-                                        {{ college[4] }}
-
-                                    {% else %}
-
-                                        —
+                                        <span class="verification-level">
+                                            Level {{ level }} Verification
+                                        </span>
 
                                     {% endif %}
 
                                 </td>
 
+
+                                <!-- Verification Source -->
+
                                 <td>
-                                    ⭐ {{ college[5] }}
+
+                                    <div class="source">
+
+                                        {% if college.get('verification_source') %}
+
+                                            {{ college.get('verification_source') }}
+
+                                        {% else %}
+
+                                            —
+
+                                        {% endif %}
+
+                                    </div>
+
                                 </td>
+
+
+                                <!-- Review Count -->
+
+                                <td>
+
+                                    <div class="review-count">
+
+                                        ⭐ {{ college.get('review_count', 0) }}
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Action -->
 
                                 <td>
 
                                     <a
-                                        href="{{ url_for('admin_verify_college', college_id=college[0]) }}"
+                                        href="{{ url_for(
+                                            'admin_verify_college',
+                                            college_id=college.get('id')
+                                        ) }}"
                                         class="verify-btn"
                                     >
+
                                         Verify / Manage
+
                                     </a>
 
                                 </td>

@@ -4,6 +4,7 @@ import config
 import random
 import time
 import smtplib
+from urllib.parse import urlparse
 
 from email.message import EmailMessage
 
@@ -18,10 +19,84 @@ app = Flask(__name__)
 
 app.secret_key = config.SECRET_KEY
 
+@app.route("/suggest-college", methods=["GET", "POST"])
+def suggest_college():
 
+    message = None
+    message_type = None
+
+    if request.method == "POST":
+
+        college_name = request.form.get("college_name", "").strip()
+        city = request.form.get("city", "").strip()
+        state = request.form.get("state", "").strip()
+        official_website = request.form.get("official_website", "").strip()
+        reason = request.form.get("reason", "").strip()
+
+        # Validate required fields
+        if not college_name or not city or not state or not reason:
+
+            message = "Please fill in all required fields."
+            message_type = "error"
+
+        elif official_website and not official_website.startswith(("http://", "https://")):
+
+            message = "Please enter a valid website starting with http:// or https://."
+            message_type = "error"
+
+        else:
+
+            connection = get_db_connection()
+
+            try:
+                with connection.cursor() as cursor:
+
+                    cursor.execute("""
+                        INSERT INTO college_suggestions
+                        (
+                            college_name,
+                            city,
+                            state,
+                            official_website,
+                            reason,
+                            submitted_by,
+                            status
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s, 'pending')
+                    """, (
+                        college_name,
+                        city,
+                        state,
+                        official_website or None,
+                        reason,
+                        session.get("user_id")
+                    ))
+
+                connection.commit()
+
+                message = "Your college suggestion has been submitted successfully!"
+                message_type = "success"
+
+            except Exception as e:
+
+                connection.rollback()
+                print("College Suggestion Error:", e)
+
+                message = "Something went wrong. Please try again."
+                message_type = "error"
+
+            finally:
+                connection.close()
+
+    return render_template(
+        "suggest_college.html",
+        message=message,
+        message_type=message_type
+    )
 # =========================================================
 # DATABASE CONNECTION
 # =========================================================
+
 
 def get_db_connection():
     return pymysql.connect(
@@ -29,76 +104,71 @@ def get_db_connection():
         port=config.DB_PORT,
         user=config.DB_USER,
         password=config.DB_PASSWORD,
-        database=config.DB_NAME
+        database=config.DB_NAME,
+        cursorclass=pymysql.cursors.DictCursor
     )
+
+
 
 
 # =========================================================
 # DATABASE SCHEMA
 # =========================================================
 
-def ensure_schema():
 
+def ensure_schema():
     connection = get_db_connection()
 
     try:
-
         with connection.cursor() as cursor:
 
             # -------------------------------------------------
             # USERS - ADMIN COLUMN
             # -------------------------------------------------
-
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) AS column_count
                 FROM information_schema.columns
                 WHERE table_schema = %s
-                AND table_name = 'users'
-                AND column_name = 'is_admin'
+                  AND table_name = 'users'
+                  AND column_name = 'is_admin'
             """, (config.DB_NAME,))
 
-            if cursor.fetchone()[0] == 0:
-
+            if cursor.fetchone()["column_count"] == 0:
                 cursor.execute("""
                     ALTER TABLE users
                     ADD COLUMN is_admin TINYINT(1)
                     NOT NULL DEFAULT 0
                 """)
 
-
             # -------------------------------------------------
             # COLLEGES - LOCATION
             # -------------------------------------------------
-
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) AS column_count
                 FROM information_schema.columns
                 WHERE table_schema = %s
-                AND table_name = 'colleges'
-                AND column_name = 'location'
+                  AND table_name = 'colleges'
+                  AND column_name = 'location'
             """, (config.DB_NAME,))
 
-            if cursor.fetchone()[0] == 0:
+            if cursor.fetchone()["column_count"] == 0:
                 cursor.execute("""
                     ALTER TABLE colleges
                     ADD COLUMN location VARCHAR(255) NULL
                 """)
 
-
             # -------------------------------------------------
             # COLLEGES - VERIFICATION STATUS
             # -------------------------------------------------
-
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) AS column_count
                 FROM information_schema.columns
                 WHERE table_schema = %s
-                AND table_name = 'colleges'
-                AND column_name = 'verification_status'
+                  AND table_name = 'colleges'
+                  AND column_name = 'verification_status'
             """, (config.DB_NAME,))
 
-            if cursor.fetchone()[0] == 0:
-
+            if cursor.fetchone()["column_count"] == 0:
                 cursor.execute("""
                     ALTER TABLE colleges
                     ADD COLUMN verification_status
@@ -106,21 +176,18 @@ def ensure_schema():
                     NOT NULL DEFAULT 'unverified'
                 """)
 
-
             # -------------------------------------------------
             # COLLEGES - VERIFICATION LEVEL
             # -------------------------------------------------
-
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) AS column_count
                 FROM information_schema.columns
                 WHERE table_schema = %s
-                AND table_name = 'colleges'
-                AND column_name = 'verification_level'
+                  AND table_name = 'colleges'
+                  AND column_name = 'verification_level'
             """, (config.DB_NAME,))
 
-            if cursor.fetchone()[0] == 0:
-
+            if cursor.fetchone()["column_count"] == 0:
                 cursor.execute("""
                     ALTER TABLE colleges
                     ADD COLUMN verification_level
@@ -128,100 +195,85 @@ def ensure_schema():
                     NOT NULL DEFAULT 0
                 """)
 
-
             # -------------------------------------------------
             # COLLEGES - VERIFICATION SOURCE
             # -------------------------------------------------
-
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) AS column_count
                 FROM information_schema.columns
                 WHERE table_schema = %s
-                AND table_name = 'colleges'
-                AND column_name = 'verification_source'
+                  AND table_name = 'colleges'
+                  AND column_name = 'verification_source'
             """, (config.DB_NAME,))
 
-            if cursor.fetchone()[0] == 0:
-
+            if cursor.fetchone()["column_count"] == 0:
                 cursor.execute("""
                     ALTER TABLE colleges
                     ADD COLUMN verification_source
-                    VARCHAR(255)
-                    NULL
+                    VARCHAR(255) NULL
                 """)
-
 
             # -------------------------------------------------
             # COLLEGES - SOURCE URL
             # -------------------------------------------------
-
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) AS column_count
                 FROM information_schema.columns
                 WHERE table_schema = %s
-                AND table_name = 'colleges'
-                AND column_name = 'verification_source_url'
+                  AND table_name = 'colleges'
+                  AND column_name = 'verification_source_url'
             """, (config.DB_NAME,))
 
-            if cursor.fetchone()[0] == 0:
-
+            if cursor.fetchone()["column_count"] == 0:
                 cursor.execute("""
                     ALTER TABLE colleges
                     ADD COLUMN verification_source_url
-                    VARCHAR(1000)
-                    NULL
+                    VARCHAR(1000) NULL
                 """)
-
 
             # -------------------------------------------------
             # COLLEGES - VERIFICATION NOTES
             # -------------------------------------------------
-
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) AS column_count
                 FROM information_schema.columns
                 WHERE table_schema = %s
-                AND table_name = 'colleges'
-                AND column_name = 'verification_notes'
+                  AND table_name = 'colleges'
+                  AND column_name = 'verification_notes'
             """, (config.DB_NAME,))
 
-            if cursor.fetchone()[0] == 0:
-
+            if cursor.fetchone()["column_count"] == 0:
                 cursor.execute("""
                     ALTER TABLE colleges
-                    ADD COLUMN verification_notes
-                    TEXT
-                    NULL
+                    ADD COLUMN verification_notes TEXT NULL
                 """)
-
 
             # -------------------------------------------------
             # COLLEGES - VERIFIED DATE
             # -------------------------------------------------
-
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) AS column_count
                 FROM information_schema.columns
                 WHERE table_schema = %s
-                AND table_name = 'colleges'
-                AND column_name = 'verified_at'
+                  AND table_name = 'colleges'
+                  AND column_name = 'verified_at'
             """, (config.DB_NAME,))
 
-            if cursor.fetchone()[0] == 0:
-
+            if cursor.fetchone()["column_count"] == 0:
                 cursor.execute("""
                     ALTER TABLE colleges
-                    ADD COLUMN verified_at
-                    DATETIME
-                    NULL
+                    ADD COLUMN verified_at DATETIME NULL
                 """)
-
 
         connection.commit()
 
-    finally:
+    except Exception:
+        connection.rollback()
+        raise
 
+    finally:
         connection.close()
+
 
 
 # =========================================================
@@ -339,8 +391,7 @@ def admin_required():
         connection.close()
 
 
-    if not user or not bool(user[0]):
-
+    if not user or not bool(user["is_admin"]):
         return (
             "Access denied. Administrator privileges are required.",
             403
@@ -350,59 +401,60 @@ def admin_required():
     return None
 
 
+# ```python
 # =========================================================
 # HOME
 # =========================================================
 
+
+
 @app.route("/")
 def home():
-
     connection = get_db_connection()
 
     try:
-
+        # Fetch colleges
         with connection.cursor() as cursor:
-
             cursor.execute("""
                 SELECT
-                    colleges.*,
+                    colleges.id,
+                    colleges.name,
+                    colleges.city,
+                    colleges.state,
+                    colleges.description,
+                    colleges.verification_status,
+                    colleges.verification_level,
                     COUNT(reviews.id) AS review_count,
-                    COALESCE(
-                        ROUND(AVG(reviews.overall), 1),
-                        0
-                    ) AS average_rating,
-                    COALESCE(
-                        ROUND(
-                            AVG(reviews.recommend) * 100,
-                            0
-                        ),
-                        0
-                    ) AS recommend_percentage
-
+                    COALESCE(ROUND(AVG(reviews.overall), 1), 0) AS average_rating,
+                    COALESCE(ROUND(AVG(reviews.recommend) * 100, 0), 0) AS recommend_percentage
                 FROM colleges
-
                 LEFT JOIN reviews
                     ON colleges.id = reviews.college_id
-
-                GROUP BY colleges.id
-
+                GROUP BY
+                    colleges.id,
+                    colleges.name,
+                    colleges.city,
+                    colleges.state,
+                    colleges.description,
+                    colleges.verification_status,
+                    colleges.verification_level
                 ORDER BY colleges.name
             """)
 
             colleges = cursor.fetchall()
 
-
+        # Fetch total reviews using a new cursor
+        with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT COUNT(*)
+                SELECT COUNT(*) AS total
                 FROM reviews
             """)
 
-            total_reviews = cursor.fetchone()[0]
+            result = cursor.fetchone()
+            total_reviews = result["total"] if result else 0
 
     finally:
-
         connection.close()
-
 
     return render_template(
         "index.html",
@@ -411,6 +463,7 @@ def home():
         logged_in="user_id" in session,
         username=session.get("anonymous_name")
     )
+
 
 
 # =========================================================
@@ -522,85 +575,68 @@ def reviews_page():
 # USER DASHBOARD
 # =========================================================
 
+
 @app.route("/dashboard")
 def dashboard():
-
     if "user_id" not in session:
-
-        return redirect(
-            url_for("login")
-        )
-
+        return redirect(url_for("login"))
 
     connection = get_db_connection()
 
     try:
-
         with connection.cursor() as cursor:
-
+            # Fetch all reviews submitted by the logged-in user
             cursor.execute("""
                 SELECT
-                    reviews.id,
-                    colleges.id,
-                    colleges.name,
+                    reviews.id AS review_id,
+                    colleges.id AS college_id,
+                    colleges.name AS college_name,
                     reviews.title,
                     reviews.overall,
                     reviews.review_text,
                     reviews.recommend,
                     reviews.created_at
-
                 FROM reviews
-
                 JOIN colleges
                     ON reviews.college_id = colleges.id
-
                 WHERE reviews.user_id = %s
-
                 ORDER BY reviews.created_at DESC
-            """, (
-                session["user_id"],
-            ))
+            """, (session["user_id"],))
 
             reviews = cursor.fetchall()
 
-
+            # Calculate the user's review statistics
             cursor.execute("""
                 SELECT
-                    COUNT(*),
-                    COALESCE(
-                        SUM(recommend),
-                        0
-                    ),
-                    COALESCE(
-                        ROUND(
-                            AVG(overall),
-                            1
-                        ),
-                        0
-                    )
-
+                    COUNT(*) AS total_reviews,
+                    COALESCE(SUM(recommend), 0) AS recommended_count,
+                    COALESCE(ROUND(AVG(overall), 1), 0) AS average_rating
                 FROM reviews
-
                 WHERE user_id = %s
-            """, (
-                session["user_id"],
-            ))
+            """, (session["user_id"],))
 
             stats = cursor.fetchone()
 
+            if stats is None:
+                stats = {
+                    "total_reviews": 0,
+                    "recommended_count": 0,
+                    "average_rating": 0
+                }
+
     finally:
-
         connection.close()
-
 
     return render_template(
         "dashboard.html",
         reviews=reviews,
-        recommended_count=stats[1],
-        average_rating=stats[2],
+        total_reviews=stats["total_reviews"],
+        recommended_count=stats["recommended_count"],
+        average_rating=stats["average_rating"],
         logged_in=True,
         username=session.get("anonymous_name")
     )
+
 
 
 # =========================================================
@@ -2148,6 +2184,8 @@ def login():
         "login.html"
     )
 # =========================================================
+# ```python
+# =========================================================
 # ADMIN DASHBOARD
 # =========================================================
 
@@ -2155,149 +2193,93 @@ def login():
 def admin_dashboard():
 
     denied = admin_required()
-
     if denied:
-
         return denied
-
 
     connection = get_db_connection()
 
     try:
-
         with connection.cursor() as cursor:
 
             # Total users
-
-            cursor.execute(
-                """
-                SELECT COUNT(*)
+            cursor.execute("""
+                SELECT COUNT(*) AS total
                 FROM users
-                """
-            )
-
-            user_count = cursor.fetchone()[0]
-
+            """)
+            user_count = cursor.fetchone()["total"]
 
             # Total colleges
-
-            cursor.execute(
-                """
-                SELECT COUNT(*)
+            cursor.execute("""
+                SELECT COUNT(*) AS total
                 FROM colleges
-                """
-            )
-
-            college_count = cursor.fetchone()[0]
-
+            """)
+            college_count = cursor.fetchone()["total"]
 
             # Total reviews
-
-            cursor.execute(
-                """
-                SELECT COUNT(*)
+            cursor.execute("""
+                SELECT COUNT(*) AS total
                 FROM reviews
-                """
-            )
-
-            review_count = cursor.fetchone()[0]
-
+            """)
+            review_count = cursor.fetchone()["total"]
 
             # Total admins
-
-            cursor.execute(
-                """
-                SELECT COUNT(*)
+            cursor.execute("""
+                SELECT COUNT(*) AS total
                 FROM users
                 WHERE is_admin = 1
-                """
-            )
-
-            admin_count = cursor.fetchone()[0]
-
+            """)
+            admin_count = cursor.fetchone()["total"]
 
             # Verified colleges
-
-            cursor.execute(
-                """
-                SELECT COUNT(*)
+            cursor.execute("""
+                SELECT COUNT(*) AS total
                 FROM colleges
                 WHERE verification_status = 'verified'
-                """
-            )
-
-            verified_count = cursor.fetchone()[0]
-
+            """)
+            verified_count = cursor.fetchone()["total"]
 
             # Pending colleges
-
-            cursor.execute(
-                """
-                SELECT COUNT(*)
+            cursor.execute("""
+                SELECT COUNT(*) AS total
                 FROM colleges
                 WHERE verification_status = 'pending'
-                """
-            )
+            """)
+            pending_count = cursor.fetchone()["total"]
 
-            pending_count = cursor.fetchone()[0]
-
-
-            # College list
-
-            cursor.execute(
-                """
+            # Recent colleges
+            cursor.execute("""
                 SELECT
                     colleges.id,
                     colleges.name,
                     colleges.verification_status,
-                    COUNT(reviews.id)
-
+                    COUNT(reviews.id) AS review_count
                 FROM colleges
-
                 LEFT JOIN reviews
                     ON colleges.id = reviews.college_id
-
                 GROUP BY
                     colleges.id,
                     colleges.name,
                     colleges.verification_status
-
                 ORDER BY colleges.name
-
                 LIMIT 10
-                """
-            )
+            """)
 
             recent_colleges = cursor.fetchall()
 
     finally:
-
         connection.close()
-
 
     return render_template(
         "admin.html",
-
         user_count=user_count,
-
         college_count=college_count,
-
         review_count=review_count,
-
         admin_count=admin_count,
-
         verified_count=verified_count,
-
         pending_count=pending_count,
-
         recent_colleges=recent_colleges,
-
-        username=session.get(
-            "anonymous_name"
-        )
+        username=session.get("anonymous_name")
     )
-
-
 # =========================================================
 # ADMIN COLLEGES
 # =========================================================
@@ -2306,27 +2288,23 @@ def admin_dashboard():
 def admin_colleges():
 
     denied = admin_required()
-
     if denied:
-
         return denied
-
 
     connection = get_db_connection()
 
     try:
-
         with connection.cursor() as cursor:
 
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT
                     colleges.id,
                     colleges.name,
                     colleges.location,
                     colleges.verification_status,
+                    colleges.verification_level,
                     colleges.verification_source,
-                    COUNT(reviews.id)
+                    COUNT(reviews.id) AS review_count
 
                 FROM colleges
 
@@ -2338,30 +2316,345 @@ def admin_colleges():
                     colleges.name,
                     colleges.location,
                     colleges.verification_status,
+                    colleges.verification_level,
                     colleges.verification_source
 
                 ORDER BY colleges.name
-                """
-            )
+            """)
 
             colleges = cursor.fetchall()
 
     finally:
-
         connection.close()
-
 
     return render_template(
         "admin_colleges.html",
-        colleges=colleges,
-        username=session.get(
-            "anonymous_name"
-        )
+        colleges=colleges
+    )
+# =========================================================
+# ADMIN COLLEGE SUGGESTIONS
+# =========================================================
+
+@app.route("/admin/college-suggestions")
+def admin_college_suggestions():
+
+    denied = admin_required()
+    if denied:
+        return denied
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+
+            cursor.execute("""
+                SELECT
+                    id,
+                    college_name,
+                    city,
+                    state,
+                    official_website,
+                    reason,
+                    submitted_by,
+                    status,
+                    admin_notes,
+                    created_at,
+                    reviewed_at
+                FROM college_suggestions
+                ORDER BY
+                    CASE
+                        WHEN status = 'pending' THEN 0
+                        ELSE 1
+                    END,
+                    created_at DESC
+            """)
+
+            suggestions = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT COUNT(*) AS total
+                FROM college_suggestions
+                WHERE status = 'pending'
+            """)
+
+            pending_count = cursor.fetchone()["total"]
+
+    finally:
+        connection.close()
+
+    return render_template(
+        "admin_suggestions.html",
+        suggestions=suggestions,
+        pending_count=pending_count,
+        message=request.args.get("message"),
+        message_type=request.args.get("type", "info")
     )
 
 
 # =========================================================
-# ADMIN VERIFY COLLEGE
+# ADMIN APPROVE COLLEGE SUGGESTION
+# =========================================================
+
+@app.route(
+    "/admin/college-suggestions/<int:suggestion_id>/approve",
+    methods=["POST"]
+)
+def admin_approve_suggestion(suggestion_id):
+
+    denied = admin_required()
+    if denied:
+        return denied
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+
+            # Lock the suggestion to prevent duplicate processing.
+            cursor.execute("""
+                SELECT *
+                FROM college_suggestions
+                WHERE id = %s
+                FOR UPDATE
+            """, (suggestion_id,))
+
+            suggestion = cursor.fetchone()
+
+            if suggestion is None:
+                connection.rollback()
+
+                return redirect(url_for(
+                    "admin_college_suggestions",
+                    message="Suggestion not found.",
+                    type="error"
+                ))
+
+            if suggestion["status"] != "pending":
+                connection.rollback()
+
+                return redirect(url_for(
+                    "admin_college_suggestions",
+                    message="This suggestion has already been reviewed.",
+                    type="error"
+                ))
+
+            college_name = suggestion["college_name"].strip()
+            city = suggestion["city"].strip()
+            state = suggestion["state"].strip()
+
+            # Check for an existing college with the same
+            # name, city and state.
+            cursor.execute("""
+                SELECT id, name
+                FROM colleges
+                WHERE LOWER(TRIM(name)) = LOWER(TRIM(%s))
+                  AND LOWER(TRIM(COALESCE(city, ''))) =
+                      LOWER(TRIM(%s))
+                  AND LOWER(TRIM(COALESCE(state, ''))) =
+                      LOWER(TRIM(%s))
+                LIMIT 1
+            """, (college_name, city, state))
+
+            duplicate = cursor.fetchone()
+
+            if duplicate:
+
+                connection.rollback()
+
+                return redirect(url_for(
+                    "admin_college_suggestions",
+                    message=(
+                        "A college with the same name, city and state "
+                        "already exists. Existing college ID: "
+                        + str(duplicate["id"])
+                    ),
+                    type="error"
+                ))
+
+            # Preserve the submitted website and reason
+            # because colleges currently has no website column.
+            description_parts = [
+                "Suggested by a CollegeTruth student.",
+                "Reason: " + suggestion["reason"]
+            ]
+
+            if suggestion["official_website"]:
+                description_parts.append(
+                    "Official website: "
+                    + suggestion["official_website"]
+                )
+
+            description = "\n\n".join(description_parts)
+
+            location = city + ", " + state
+
+            # Add the approved college.
+            cursor.execute("""
+                INSERT INTO colleges (
+                    name,
+                    city,
+                    state,
+                    description,
+                    location,
+                    verification_status,
+                    verification_level
+                )
+                VALUES (%s, %s, %s, %s, %s, 'unverified', 0)
+            """, (
+                college_name,
+                city,
+                state,
+                description,
+                location
+            ))
+
+            new_college_id = cursor.lastrowid
+
+            # Mark suggestion as approved.
+            cursor.execute("""
+                UPDATE college_suggestions
+                SET
+                    status = 'approved',
+                    admin_notes = %s,
+                    reviewed_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+                  AND status = 'pending'
+            """, (
+                "Approved. College ID: " + str(new_college_id),
+                suggestion_id
+            ))
+
+            if cursor.rowcount != 1:
+                raise RuntimeError(
+                    "Suggestion status could not be updated."
+                )
+
+        connection.commit()
+
+    except Exception:
+
+        connection.rollback()
+
+        app.logger.exception(
+            "Failed to approve college suggestion %s",
+            suggestion_id
+        )
+
+        return redirect(url_for(
+            "admin_college_suggestions",
+            message="An error occurred while approving the suggestion.",
+            type="error"
+        ))
+
+    finally:
+        connection.close()
+
+    return redirect(url_for(
+        "admin_college_suggestions",
+        message="College approved and added successfully!",
+        type="success"
+    ))
+
+
+# =========================================================
+# ADMIN REJECT COLLEGE SUGGESTION
+# =========================================================
+
+@app.route(
+    "/admin/college-suggestions/<int:suggestion_id>/reject",
+    methods=["POST"]
+)
+def admin_reject_suggestion(suggestion_id):
+
+    denied = admin_required()
+    if denied:
+        return denied
+
+    admin_notes = request.form.get(
+        "admin_notes", ""
+    ).strip()
+
+    if not admin_notes:
+        admin_notes = "Rejected by administrator."
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+
+            cursor.execute("""
+                SELECT id, status
+                FROM college_suggestions
+                WHERE id = %s
+                FOR UPDATE
+            """, (suggestion_id,))
+
+            suggestion = cursor.fetchone()
+
+            if suggestion is None:
+                connection.rollback()
+
+                return redirect(url_for(
+                    "admin_college_suggestions",
+                    message="Suggestion not found.",
+                    type="error"
+                ))
+
+            if suggestion["status"] != "pending":
+                connection.rollback()
+
+                return redirect(url_for(
+                    "admin_college_suggestions",
+                    message="This suggestion has already been reviewed.",
+                    type="error"
+                ))
+
+            cursor.execute("""
+                UPDATE college_suggestions
+                SET
+                    status = 'rejected',
+                    admin_notes = %s,
+                    reviewed_at = CURRENT_TIMESTAMP
+                WHERE id = %s
+                  AND status = 'pending'
+            """, (
+                admin_notes,
+                suggestion_id
+            ))
+
+            if cursor.rowcount != 1:
+                raise RuntimeError(
+                    "Suggestion status could not be updated."
+                )
+
+        connection.commit()
+
+    except Exception:
+
+        connection.rollback()
+
+        app.logger.exception(
+            "Failed to reject college suggestion %s",
+            suggestion_id
+        )
+
+        return redirect(url_for(
+            "admin_college_suggestions",
+            message="An error occurred while rejecting the suggestion.",
+            type="error"
+        ))
+
+    finally:
+        connection.close()
+
+    return redirect(url_for(
+        "admin_college_suggestions",
+        message="College suggestion rejected successfully.",
+        type="success"
+    ))
+
+# =========================================================
+# ADMIN COLLEGE VERIFICATION
 # =========================================================
 
 @app.route(
@@ -2373,18 +2666,18 @@ def admin_verify_college(college_id):
     denied = admin_required()
 
     if denied:
-
         return denied
 
+    # -----------------------------------------------------
+    # FETCH CURRENT COLLEGE
+    # -----------------------------------------------------
 
     connection = get_db_connection()
 
     try:
-
         with connection.cursor() as cursor:
 
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT
                     id,
                     name,
@@ -2395,34 +2688,21 @@ def admin_verify_college(college_id):
                     verification_source_url,
                     verification_notes,
                     verified_at
-
                 FROM colleges
-
                 WHERE id = %s
-                """,
-                (
-                    college_id,
-                )
-            )
+            """, (college_id,))
 
             college = cursor.fetchone()
 
     finally:
-
         connection.close()
 
-
     if college is None:
+        return "College not found.", 404
 
-        return (
-            "College not found.",
-            404
-        )
-
-
-    # ---------------------------------------------------------
-    # SHOW FORM
-    # ---------------------------------------------------------
+    # -----------------------------------------------------
+    # DISPLAY FORM
+    # -----------------------------------------------------
 
     if request.method == "GET":
 
@@ -2431,168 +2711,242 @@ def admin_verify_college(college_id):
             college=college
         )
 
-
-    # ---------------------------------------------------------
-    # FORM DATA
-    # ---------------------------------------------------------
+    # -----------------------------------------------------
+    # READ FORM DATA
+    # -----------------------------------------------------
 
     status = request.form.get(
         "verification_status",
         "unverified"
     ).strip().lower()
 
-
-    level = request.form.get(
+    level_text = request.form.get(
         "verification_level",
         "0"
     ).strip()
-
 
     source = request.form.get(
         "verification_source",
         ""
     ).strip()
 
-
     source_url = request.form.get(
         "verification_source_url",
         ""
     ).strip()
-
 
     notes = request.form.get(
         "verification_notes",
         ""
     ).strip()
 
-
     allowed_statuses = {
-
         "unverified",
         "pending",
         "verified",
         "rejected"
-
     }
 
-
     if status not in allowed_statuses:
+        return "Invalid verification status.", 400
 
-        return (
-            "Invalid verification status.",
-            400
-        )
-
+    # -----------------------------------------------------
+    # VALIDATE LEVEL
+    # -----------------------------------------------------
 
     try:
+        level = int(level_text)
 
-        level = int(level)
+    except (TypeError, ValueError):
+        return "Invalid verification level.", 400
 
-    except ValueError:
-
-        return (
-            "Invalid verification level.",
-            400
-        )
-
-
-    if level < 0 or level > 3:
-
+    if not 0 <= level <= 3:
         return (
             "Verification level must be between 0 and 3.",
             400
         )
 
+    # -----------------------------------------------------
+    # VALIDATE EVIDENCE
+    # -----------------------------------------------------
 
-    # A verified institution must have evidence.
+    if status == "verified":
 
-    if status == "verified" and not source:
+        if not source:
+            return "A verification source is required.", 400
 
-        return (
-            "A verification source is required for a verified college.",
-            400
-        )
+        if not source_url:
+            return "A source URL is required.", 400
 
+        parsed_url = urlparse(source_url)
+
+        if (
+            parsed_url.scheme != "https"
+            or not parsed_url.hostname
+            or parsed_url.username
+            or parsed_url.password
+        ):
+            return "Enter a valid HTTPS source URL.", 400
+
+        if not notes:
+            return "Verification evidence notes are required.", 400
+
+        if level == 0:
+            return (
+                "A verified college must have a verification "
+                "level greater than zero.",
+                400
+            )
+
+    # -----------------------------------------------------
+    # UPDATE COLLEGE AND RECORD HISTORY
+    # -----------------------------------------------------
 
     connection = get_db_connection()
 
     try:
-
         with connection.cursor() as cursor:
 
-            if status == "verified":
+            cursor.execute("""
+                SELECT verification_status
+                FROM colleges
+                WHERE id = %s
+                FOR UPDATE
+            """, (college_id,))
 
-                cursor.execute(
-                    """
-                    UPDATE colleges
+            current = cursor.fetchone()
 
-                    SET
-                        verification_status = %s,
-                        verification_level = %s,
-                        verification_source = %s,
-                        verification_source_url = %s,
-                        verification_notes = %s,
-                        verified_at = NOW()
+            if current is None:
+                connection.rollback()
+                return "College not found.", 404
 
-                    WHERE id = %s
-                    """,
-                    (
-                        status,
-                        level,
-                        source,
-                        source_url if source_url else None,
-                        notes if notes else None,
-                        college_id
-                    )
+            previous_status = current["verification_status"]
+
+            cursor.execute("""
+                UPDATE colleges
+                SET
+                    verification_status = %s,
+                    verification_level = %s,
+                    verification_source = %s,
+                    verification_source_url = %s,
+                    verification_notes = %s,
+                    verified_at = CASE
+                        WHEN %s = 'verified'
+                        THEN CASE
+                            WHEN verification_status = 'verified'
+                            THEN verified_at
+                            ELSE NOW()
+                        END
+                        ELSE NULL
+                    END
+                WHERE id = %s
+            """, (
+                status,
+                level,
+                source or None,
+                source_url or None,
+                notes or None,
+                status,
+                college_id
+            ))
+
+            cursor.execute("""
+                INSERT INTO college_verification_history (
+                    college_id,
+                    previous_status,
+                    new_status,
+                    verification_level,
+                    verification_source,
+                    verification_source_url,
+                    verification_notes,
+                    admin_user_id
                 )
-
-            else:
-
-                cursor.execute(
-                    """
-                    UPDATE colleges
-
-                    SET
-                        verification_status = %s,
-                        verification_level = %s,
-                        verification_source = %s,
-                        verification_source_url = %s,
-                        verification_notes = %s,
-                        verified_at = NULL
-
-                    WHERE id = %s
-                    """,
-                    (
-                        status,
-                        level,
-                        source if source else None,
-                        source_url if source_url else None,
-                        notes if notes else None,
-                        college_id
-                    )
-                )
-
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                college_id,
+                previous_status,
+                status,
+                level,
+                source or None,
+                source_url or None,
+                notes or None,
+                session.get("user_id")
+            ))
 
         connection.commit()
 
-    finally:
+    except Exception as e:
 
+        connection.rollback()
+
+        app.logger.exception(
+            "Failed to update verification for college %s",
+            college_id
+        )
+
+        return f"Could not save verification: {e}", 500
+
+    finally:
         connection.close()
 
+    return redirect(url_for("admin_colleges"))
 
-    return redirect(
-        url_for(
-            "admin_colleges"
-        )
+
+# =========================================================
+# ADMIN VERIFICATION HISTORY
+# =========================================================
+
+@app.route("/admin/verification-history")
+def admin_verification_history():
+
+    denied = admin_required()
+
+    if denied:
+        return denied
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+
+            cursor.execute("""
+                SELECT
+                    h.id,
+                    h.college_id,
+                    c.name AS college_name,
+                    h.previous_status,
+                    h.new_status,
+                    h.verification_level,
+                    h.verification_source,
+                    h.verification_source_url,
+                    h.verification_notes,
+                    h.admin_user_id,
+                    h.changed_at
+
+                FROM college_verification_history h
+
+                LEFT JOIN colleges c
+                    ON h.college_id = c.id
+
+                ORDER BY h.changed_at DESC, h.id DESC
+            """)
+
+            history = cursor.fetchall()
+
+    finally:
+        connection.close()
+
+    return render_template(
+        "admin_verification_history.html",
+        history=history
     )
-
-
 # =========================================================
 # ADMIN REVIEW MANAGEMENT
 # =========================================================
 
 @app.route("/admin/reviews")
 def admin_reviews():
+
     denied = admin_required()
 
     if denied:
@@ -2620,15 +2974,11 @@ def admin_reviews():
                     reviews.overall,
                     reviews.recommend,
                     reviews.created_at
-
                 FROM reviews
-
                 JOIN colleges
                     ON reviews.college_id = colleges.id
-
                 JOIN users
                     ON reviews.user_id = users.id
-
                 ORDER BY reviews.created_at DESC
                 """
             )
@@ -2654,6 +3004,7 @@ def admin_reviews():
     methods=["POST"]
 )
 def admin_delete_review(review_id):
+
     denied = admin_required()
 
     if denied:
@@ -2663,43 +3014,43 @@ def admin_delete_review(review_id):
 
     try:
         with connection.cursor() as cursor:
+
             cursor.execute(
                 """
                 SELECT id
                 FROM reviews
                 WHERE id = %s
                 """,
-                (
-                    review_id,
-                )
+                (review_id,)
             )
 
             review = cursor.fetchone()
 
             if review is None:
-                return (
-                    "Review not found.",
-                    404
-                )
+                return "Review not found.", 404
 
             cursor.execute(
                 """
                 DELETE FROM reviews
                 WHERE id = %s
                 """,
-                (
-                    review_id,
-                )
+                (review_id,)
             )
 
         connection.commit()
 
+    except Exception:
+        connection.rollback()
+        app.logger.exception(
+            "Failed to delete review %s",
+            review_id
+        )
+        return "Could not delete the review.", 500
+
     finally:
         connection.close()
 
-    return redirect(
-        url_for("admin_reviews")
-    )
+    return redirect(url_for("admin_reviews"))
 
 
 # =========================================================
@@ -2708,12 +3059,19 @@ def admin_delete_review(review_id):
 
 @app.route("/logout")
 def logout():
-
     session.clear()
+    return redirect(url_for("home"))
 
-    return redirect(
-        url_for("home")
-    )
+
+# =========================================================
+# STARTUP
+# =========================================================
+
+if __name__ == "__main__":
+    # Keep your existing startup code here.
+    # Do not replace it with this comment.
+    ...
+
 
 
 # =========================================================
@@ -2723,7 +3081,6 @@ def logout():
 if __name__ == "__main__":
 
     try:
-
         ensure_schema()
 
         print()
@@ -2732,20 +3089,18 @@ if __name__ == "__main__":
         print("========================================")
         print("Database schema checked successfully.")
         print("Admin + verification schema is ready.")
-        print("OTP authentication remains enabled.")
         print("========================================")
         print()
 
     except Exception as error:
-
         print()
         print("DATABASE SCHEMA ERROR:")
         print(error)
         print()
-
         raise
 
+    app.run(debug=True)
 
-    app.run(
-        debug=True
-    )
+
+
+

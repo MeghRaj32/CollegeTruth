@@ -1,40 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CollegeTruth — Know Before You Join</title>
 
     <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: Arial, sans-serif;
             background: #0b1020;
-            color: white;
+            color: #fff;
         }
 
-        /* =========================
-           NAVIGATION
-        ========================= */
-
+        /* NAVIGATION */
         nav {
-            height: 70px;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 8%;
+            gap: 24px;
+            padding: 14px 8%;
             border-bottom: 1px solid #20283d;
+            background: #0b1020;
         }
 
         .logo {
@@ -42,144 +31,128 @@
             font-size: 25px;
             font-weight: bold;
             text-decoration: none;
+            white-space: nowrap;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 25px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 22px;
         }
 
         .nav-links a {
             color: #d7dbea;
             text-decoration: none;
+            font-size: 14px;
+            transition: color .2s ease;
         }
 
-        .nav-links a:hover {
-            color: #6ea8fe;
+        .nav-links a:hover { color: #6ea8fe; }
+        .nav-links .admin-link { color: #fbbf24; font-weight: bold; }
+        .nav-links .suggest-nav {
+            color: #93c5fd;
+            border: 1px solid rgba(110,168,254,.35);
+            padding: 9px 12px;
+            border-radius: 9px;
         }
 
-        .user-name {
-            color: #6ea8fe;
-            font-weight: bold;
-        }
-
-        /* =========================
-           HERO
-        ========================= */
-
+        /* HERO */
         .hero {
             min-height: 650px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 50px 20px;
+            padding: 65px 20px;
+            background:
+                radial-gradient(ellipse at 50% 15%, rgba(45,91,170,.18), transparent 55%),
+                #0b1020;
         }
 
-        .hero-content {
-            max-width: 800px;
-            width: 100%;
-        }
+        .hero-content { max-width: 850px; width: 100%; }
 
         .badge {
             display: inline-block;
-            padding: 8px 15px;
+            padding: 9px 16px;
             border-radius: 30px;
             background: #17213b;
             color: #7db0ff;
             margin-bottom: 25px;
+            font-size: 14px;
         }
 
         h1 {
-            font-size: 60px;
+            font-size: clamp(42px, 6vw, 66px);
             line-height: 1.1;
             margin-bottom: 25px;
+            letter-spacing: -1.5px;
         }
 
-        h1 span {
-            color: #6ea8fe;
-        }
+        h1 span { color: #6ea8fe; }
 
         .hero-description {
             color: #aeb6cc;
             font-size: 19px;
-            line-height: 1.6;
-            margin-bottom: 35px;
+            line-height: 1.7;
+            margin: 0 auto 35px;
+            max-width: 760px;
         }
 
-        /* =========================
-           SEARCH
-        ========================= */
-
+        /* SEARCH */
         .search-box {
-            background: white;
+            background: #fff;
             padding: 8px;
             border-radius: 15px;
             display: flex;
             max-width: 650px;
             margin: auto;
+            box-shadow: 0 15px 45px rgba(0,0,0,.22);
         }
 
         .search-box input {
             flex: 1;
+            min-width: 0;
             border: none;
             outline: none;
             padding: 15px;
             font-size: 16px;
             border-radius: 10px;
+            color: #111827;
         }
 
         .search-box button {
             border: none;
             background: #3978e8;
-            color: white;
+            color: #fff;
             padding: 0 25px;
             border-radius: 10px;
             font-size: 16px;
             cursor: pointer;
         }
 
-        .search-box button:hover {
-            background: #2867d7;
-        }
+        .search-box button:hover { background: #2867d7; }
 
-        /* =========================
-           STATS
-        ========================= */
-
+        /* STATS */
         .stats {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             gap: 70px;
             margin-top: 60px;
         }
 
-        .stat h2 {
-            color: #6ea8fe;
-            font-size: 30px;
-        }
+        .stat h2 { color: #6ea8fe; font-size: 30px; }
+        .stat p { color: #aeb6cc; font-size: 14px; margin-top: 5px; }
 
-        .stat p {
-            color: #aeb6cc;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        /* =========================
-           COLLEGES
-        ========================= */
-
+        /* COLLEGES */
         .colleges {
             padding: 80px 8%;
             background: #0f1528;
         }
 
-        .section-heading {
-            text-align: center;
-            margin-bottom: 45px;
-        }
-
+        .section-heading { text-align: center; margin-bottom: 45px; }
         .small-title {
             color: #6ea8fe;
             font-size: 13px;
@@ -188,76 +161,54 @@
             margin-bottom: 10px;
         }
 
-        .section-heading h2 {
-            font-size: 38px;
-            margin-bottom: 12px;
-        }
-
-        .section-heading p {
-            color: #9da7bd;
-        }
-
-        /* =========================
-           COLLEGE GRID
-        ========================= */
+        .section-heading h2 { font-size: 38px; margin-bottom: 12px; }
+        .section-heading p { color: #9da7bd; }
 
         .college-grid {
             max-width: 1100px;
             margin: auto;
-
             display: grid;
-
-            grid-template-columns:
-                repeat(
-                    auto-fit,
-                    minmax(280px, 1fr)
-                );
-
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
         }
-
-        /* =========================
-           COLLEGE CARD
-        ========================= */
 
         .college-card {
             background: #151d33;
             border: 1px solid #26314d;
             border-radius: 18px;
             padding: 25px;
-            transition: 0.3s ease;
+            transition: .3s ease;
         }
 
         .college-card:hover {
             transform: translateY(-5px);
             border-color: #3978e8;
-
-            box-shadow:
-                0 15px 35px
-                rgba(0, 0, 0, 0.25);
+            box-shadow: 0 15px 35px rgba(0,0,0,.25);
         }
 
         .college-icon {
             width: 55px;
             height: 55px;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
             background: #1d2b4c;
-
             border-radius: 14px;
-
             font-size: 25px;
-
             margin-bottom: 20px;
         }
 
-        .college-info h3 {
-            font-size: 21px;
+        .college-info h3 { font-size: 21px; margin-bottom: 8px; }
+
+        .college-title-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 9px;
             margin-bottom: 8px;
         }
+
+        .college-title-row h3 { margin-bottom: 0; }
 
         .location {
             color: #7daeff;
@@ -272,322 +223,359 @@
             min-height: 65px;
         }
 
-        .college-card a {
-            text-decoration: none;
-        }
+        .college-card a { text-decoration: none; }
 
         .college-card button {
             margin-top: 18px;
             width: 100%;
             padding: 11px;
-
             border: none;
             border-radius: 9px;
-
             background: #3978e8;
-            color: white;
-
+            color: #fff;
             cursor: pointer;
-
             font-weight: bold;
         }
 
-        .college-card button:hover {
-            background: #2867d7;
+        .college-card button:hover { background: #2867d7; }
+
+        /* COLLEGE VERIFICATION BADGES */
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            line-height: 1.2;
+            font-weight: 700;
+            white-space: nowrap;
         }
 
-        /* =========================
-           MOBILE
-        ========================= */
+        .verified-badge {
+            color: #9cc5ff;
+            background: rgba(57,120,232,.16);
+            border: 1px solid rgba(110,168,254,.55);
+        }
+
+        .verified-check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #3978e8;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        .pending-badge {
+            color: #f4d58b;
+            background: rgba(245,183,49,.12);
+            border: 1px solid rgba(245,183,49,.4);
+        }
+
+        .verification-level {
+            display: block;
+            margin-top: 7px;
+            color: #7f8ca8;
+            font-size: 11px;
+        }
+
+        /* PREMIUM SUGGESTION BANNER */
+        .suggest-college-wrapper {
+            max-width: 1150px;
+            margin: 75px auto;
+            padding: 0 25px;
+        }
+
+        .suggest-college-card {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 35px;
+            padding: 55px 60px;
+            border-radius: 24px;
+            background: linear-gradient(120deg, #151e38, #172554, #1e1b4b);
+            border: 1px solid rgba(96,165,250,.25);
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
+        }
+
+        .suggest-icon {
+            flex-shrink: 0;
+            width: 115px;
+            height: 115px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+            background: rgba(96,165,250,.12);
+            border: 1px solid rgba(147,197,253,.2);
+            border-radius: 25px;
+        }
+
+        .suggest-text { position: relative; z-index: 2; max-width: 700px; }
+
+        .suggest-label {
+            display: inline-block;
+            color: #93c5fd;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .suggest-text h2 {
+            color: #fff;
+            font-size: 34px;
+            line-height: 1.3;
+            margin: 0 0 15px;
+        }
+
+        .suggest-text h2 span { color: #60a5fa; }
+
+        .suggest-text p {
+            color: #cbd5e1;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .suggest-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 14px 23px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #fff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 10px;
+            transition: .3s ease;
+        }
+
+        .suggest-button span { font-size: 20px; transition: .3s ease; }
+
+        .suggest-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(59,130,246,.3);
+        }
+
+        .suggest-button:hover span { transform: translateX(5px); }
+
+        .suggest-decoration {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background: rgba(59,130,246,.10);
+            filter: blur(65px);
+            right: -100px;
+            bottom: -180px;
+            pointer-events: none;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 25px 8%;
+            text-align: center;
+            color: #7f8ca8;
+            border-top: 1px solid #20283d;
+            font-size: 13px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 800px) {
+            nav { padding: 15px 5%; align-items: flex-start; flex-direction: column; }
+            .nav-links { justify-content: flex-start; gap: 14px; }
+            .suggest-college-card { padding: 40px 30px; }
+        }
 
         @media (max-width: 700px) {
-
-            nav {
-                padding: 0 5%;
-            }
-
-            .nav-links {
-                gap: 12px;
-            }
-
-            .nav-links a {
-                font-size: 13px;
-            }
-
-            h1 {
-                font-size: 42px;
-            }
-
-            .stats {
+            .hero { min-height: auto; padding: 75px 20px; }
+            .hero-description { font-size: 16px; }
+            .stats { gap: 25px; margin-top: 40px; }
+            .colleges { padding: 60px 5%; }
+            .section-heading h2 { font-size: 30px; }
+            .suggest-college-card {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 35px 25px;
                 gap: 25px;
             }
-
-            .colleges {
-                padding: 60px 5%;
-            }
-
-            .section-heading h2 {
-                font-size: 30px;
-            }
-
+            .suggest-text h2 { font-size: 27px; }
+            .suggest-icon { width: 85px; height: 85px; font-size: 40px; }
         }
 
+        @media (max-width: 480px) {
+            .nav-links { gap: 11px; }
+            .nav-links a { font-size: 12px; }
+            .search-box { flex-direction: column; gap: 7px; }
+            .search-box button { min-height: 45px; }
+            .stats { gap: 22px; }
+        }
     </style>
-
 </head>
-
 
 <body>
 
-
-    <!-- =========================
-         NAVIGATION
-    ========================= -->
-
+    <!-- NAVIGATION -->
     <nav>
+        <a href="{{ url_for('home') }}" class="logo">CollegeTruth 🎓</a>
 
-    <a href="/" class="logo">
-        CollegeTruth 🎓
-    </a>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="/colleges">Explore Colleges</a>
+            <a href="/reviews">Reviews</a>
+            <a href="/dashboard">👤 Dashboard</a>
 
-    <div class="nav-links">
+            {% if session.get("is_admin") %}
+                <a href="/admin" class="admin-link">🛡️ Admin</a>
+            {% endif %}
 
-        <a href="/">
-            Home
-        </a>
+            <a href="{{ url_for('suggest_college') }}" class="suggest-nav">🏫 Suggest a College</a>
 
-        <a href="/colleges">
-            Explore Colleges
-        </a>
+            {% if session.get("user_id") %}
+                <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/login">Login</a>
+                <a href="/register">Register</a>
+            {% endif %}
+        </div>
+    </nav>
 
-        <a href="/reviews">
-            Reviews
-        </a>
-
-        <a href="/dashboard">
-            👤 Dashboard
-        </a>
-
-        {% if session.get("is_admin") %}
-            <a href="/admin" class="admin-link">
-                🛡️ Admin
-            </a>
-        {% endif %}
-
-        <a href="/login">
-            Login
-        </a>
-
-        <a href="/register">
-            Register
-        </a>
-
-        <a href="/logout">
-            Logout
-        </a>
-
-    </div>
-
-</nav>
-
-    <!-- =========================
-         HERO
-    ========================= -->
-
+    <!-- HERO -->
     <section class="hero">
-
         <div class="hero-content">
-
-
-            <div class="badge">
-                🔎 Student-powered college reviews
-            </div>
-
+            <div class="badge">🔎 Student-powered college reviews</div>
 
             <h1>
-
                 Know the <span>truth</span><br>
-
                 before you join.
-
             </h1>
 
-
             <p class="hero-description">
-
                 Real experiences. Honest reviews.
-
                 Discover what college life is actually like
                 from the students who live it.
-
             </p>
 
-
-            <!-- SEARCH -->
-
-            <form
-                class="search-box"
-                action="/search"
-                method="GET"
-            >
-
-                <input
-                    type="text"
-                    name="q"
-                    placeholder="Search your college..."
-                    required
-                >
-
-                <button type="submit">
-                    Search
-                </button>
-
+            <form class="search-box" action="/search" method="GET">
+                <input type="text" name="q" placeholder="Search your college..." required>
+                <button type="submit">Search</button>
             </form>
 
-
-            <!-- STATS -->
-
             <div class="stats">
-
-
                 <div class="stat">
-
-                    <h2>
-                        {{ colleges|length }}+
-                    </h2>
-
-                    <p>
-                        Colleges
-                    </p>
-
+                    <h2>{{ colleges|length }}+</h2>
+                    <p>Colleges</p>
                 </div>
 
-
                 <div class="stat">
-
-                    <h2>
-                        {{ total_reviews }}+
-                    </h2>
-
-                    <p>
-                        Student Reviews
-                    </p>
-
+                    <h2>{{ total_reviews }}+</h2>
+                    <p>Student Reviews</p>
                 </div>
 
-
                 <div class="stat">
-
-                    <h2>
-                        100%
-                    </h2>
-
-                    <p>
-                        Student Voice
-                    </p>
-
+                    <h2>100%</h2>
+                    <p>Student Voice</p>
                 </div>
-
-
             </div>
-
-
         </div>
-
     </section>
 
-
-    <!-- =========================
-         COLLEGES
-    ========================= -->
-
-    <section
-        class="colleges"
-        id="colleges"
-    >
-
-
+    <!-- COLLEGES -->
+    <section class="colleges" id="colleges">
         <div class="section-heading">
-
-            <p class="small-title">
-                EXPLORE
-            </p>
-
-            <h2>
-                Colleges on CollegeTruth
-            </h2>
-
-            <p>
-                See what students have to say about their college.
-            </p>
-
+            <p class="small-title">EXPLORE</p>
+            <h2>Colleges on CollegeTruth</h2>
+            <p>See what students have to say about their college.</p>
         </div>
-
 
         <div class="college-grid">
-
-
             {% for college in colleges %}
-
-
                 <div class="college-card">
-
-
-                    <div class="college-icon">
-                        🏫
-                    </div>
-
+                    <div class="college-icon">🏫</div>
 
                     <div class="college-info">
+                        <div class="college-title-row">
+                            <h3>{{ college['name'] }}</h3>
 
+                            {% set verification_status = college.get('verification_status', '')|string|trim|lower %}
 
-                        <h3>
-                            {{ college[1] }}
-                        </h3>
+                            {% if verification_status == 'verified' %}
+                                <span class="verification-badge verified-badge"
+                                      title="This college has been verified by CollegeTruth">
+                                    <span class="verified-check">✓</span>
+                                    CollegeTruth Verified
+                                </span>
+                            {% elif verification_status == 'pending' %}
+                                <span class="verification-badge pending-badge">
+                                    ◷ Verification Pending
+                                </span>
+                            {% endif %}
+                        </div>
 
+                        {% if verification_status == 'verified' and college.get('verification_level') %}
+                            <span class="verification-level">
+                                Verification Level: {{ college['verification_level'] }}/3
+                            </span>
+                        {% endif %}
 
                         <p class="location">
-
-                            📍
-                            {{ college[2] }},
-                            {{ college[3] }}
-
+                            📍 {{ college.get('city', '') }}, {{ college.get('state', '') }}
                         </p>
-
 
                         <p class="description">
-
-                            {{ college[4] }}
-
+                            {{ college.get('description', '') }}
                         </p>
 
-
-                        <a
-                            href="/college/{{ college[0] }}"
-                        >
-
-                            <button>
-                                View College
-                            </button>
-
+                        <a href="/college/{{ college['id'] }}">
+                            <button type="button">View College</button>
                         </a>
-
-
                     </div>
-
-
                 </div>
-
-
+            {% else %}
+                <p style="color:#9da7bd; text-align:center; grid-column:1/-1;">
+                    No colleges are available yet.
+                </p>
             {% endfor %}
-
-
         </div>
-
-
     </section>
 
+    <!-- SUGGEST A COLLEGE -->
+    <section class="suggest-college-wrapper">
+        <div class="suggest-college-card">
+            <div class="suggest-icon">🏫</div>
+
+            <div class="suggest-text">
+                <span class="suggest-label">GROW WITH COLLEGETRUTH</span>
+
+                <h2>Your College Deserves <span>To Be Here.</span></h2>
+
+                <p>
+                    Can't find your college? Help students discover more
+                    opportunities. Suggest your college and become part
+                    of our growing community. Every suggestion is reviewed
+                    by our administration before it is published.
+                </p>
+
+                <a href="{{ url_for('suggest_college') }}" class="suggest-button">
+                    Suggest Your College <span>→</span>
+                </a>
+            </div>
+
+            <div class="suggest-decoration"></div>
+        </div>
+    </section>
+
+    <footer>
+        © {{ now_year if now_year is defined else "2026" }} CollegeTruth. Know Before You Join.
+    </footer>
 
 </body>
-
 </html>

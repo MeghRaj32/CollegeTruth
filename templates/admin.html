@@ -294,30 +294,49 @@
 
     </div>
 
-    <div class="actions">
+    
+<div class="actions">
 
-        <a href="{{ url_for('admin_colleges') }}" class="action-card">
-            <h3>🏫 Manage Colleges</h3>
-            <p>
-                View colleges and manage their verification status.
-            </p>
-        </a>
+    <a href="{{ url_for('admin_college_suggestions') }}" class="action-card">
 
-        <a href="{{ url_for('admin_reviews') }}" class="action-card">
-            <h3>📝 Manage Reviews</h3>
-            <p>
-                Review submitted reviews and remove inappropriate content.
-            </p>
-        </a>
+    <h3>🏫 College Suggestions</h3>
 
-        <a href="{{ url_for('admin_colleges') }}" class="action-card">
-            <h3>✓ College Verification</h3>
-            <p>
-                Verify colleges using documented verification sources.
-            </p>
-        </a>
+    <p>
+        Review student-submitted colleges and approve or reject suggestions.
+    </p>
 
-    </div>
+</a>
+
+    <a href="{{ url_for('admin_colleges') }}" class="action-card">
+        <h3>🏫 Manage Colleges</h3>
+        <p>
+            View colleges and manage their verification status.
+        </p>
+    </a>
+
+    <a href="{{ url_for('admin_reviews') }}" class="action-card">
+        <h3>📝 Manage Reviews</h3>
+        <p>
+            Review submitted reviews and remove inappropriate content.
+        </p>
+    </a>
+
+    <a href="{{ url_for('admin_colleges') }}" class="action-card">
+        <h3>✓ College Verification</h3>
+        <p>
+            Verify colleges using documented verification sources.
+        </p>
+    </a>
+
+    <a href="{{ url_for('admin_verification_history') }}" class="action-card">
+        <h3>📜 Verification History</h3>
+        <p>
+            View previous verification decisions, status changes and evidence.
+        </p>
+    </a>
+
+</div>
+
 
     <div class="section">
 
@@ -341,14 +360,14 @@
             {% for college in recent_colleges %}
 
                 <tr>
-                    <td>{{ college[0] }}</td>
+                    <td>{{ college['id'] }}</td>
 
                     <td>
-                        {{ college[1] }}
+                        {{ college['name'] }}
                     </td>
 
                     <td>
-                        {% set status = college[2] or "unverified" %}
+                        {% set status = college['verification_status'] or "unverified" %}
 
                         <span class="status {{ status }}">
                             {{ status }}
@@ -356,12 +375,12 @@
                     </td>
 
                     <td>
-                        {{ college[3] }}
+                        {{ college['review_count'] }}
                     </td>
 
                     <td>
                         <a
-                            href="{{ url_for('admin_verify_college', college_id=college[0]) }}"
+                            href="{{ url_for('admin_verify_college', college_id=college['id']) }}"
                             class="manage"
                         >
                             Manage

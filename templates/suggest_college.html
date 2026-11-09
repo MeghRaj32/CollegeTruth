@@ -1,0 +1,227 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Suggest a College - CollegeTruth</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #111827;
+            padding: 18px 40px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 35px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #111827;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .message {
+            padding: 13px;
+            border-radius: 7px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 16px 20px;
+            }
+
+            .form-card {
+                padding: 22px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}">CollegeTruth</a>
+    </nav>
+
+    <div class="container">
+
+        <div class="form-card">
+
+            <h1>Suggest a College 🏫</h1>
+
+            <p class="subtitle">
+                Can't find your college on CollegeTruth?
+                Suggest it here. Our administration will review
+                your request before publishing it.
+            </p>
+
+            {% if message %}
+                <div class="message {{ message_type }}">
+                    {{ message }}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+
+                <label>College Name *</label>
+
+                <input
+                    type="text"
+                    name="college_name"
+                    placeholder="Enter college name"
+                    maxlength="255"
+                    required
+                >
+
+                <label>City *</label>
+
+                <input
+                    type="text"
+                    name="city"
+                    placeholder="Enter city"
+                    maxlength="100"
+                    required
+                >
+
+                <label>State *</label>
+
+                <input
+                    type="text"
+                    name="state"
+                    placeholder="Enter state"
+                    maxlength="100"
+                    required
+                >
+
+                <label>Official Website</label>
+
+                <input
+                    type="url"
+                    name="official_website"
+                    placeholder="https://example.com"
+                    maxlength="500"
+                >
+
+                <label>Reason for Suggestion *</label>
+
+                <textarea
+                    name="reason"
+                    placeholder="Why should this college be added to CollegeTruth?"
+                    required
+                ></textarea>
+
+                <button type="submit">
+                    Submit College Suggestion
+                </button>
+
+            </form>
+
+            <a href="{{ url_for('home') }}" class="back-link">
+                ← Back to Home
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
+```
