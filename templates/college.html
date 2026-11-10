@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ college[1] }} | CollegeTruth</title>
+    <title>{{ college.name }} | CollegeTruth</title>
 
     <style>
 
@@ -429,6 +429,43 @@
     font-weight: 600;
 }
 
+
+        /* COLLEGE MEDIA GALLERY */
+        .media-section {
+            margin-top: 30px;
+            padding: 28px;
+            background: #151d33;
+            border: 1px solid #26314d;
+            border-radius: 20px;
+        }
+        .media-section h2 { margin: 0 0 10px; }
+        .media-help { color: #aab4ca; line-height: 1.6; margin-bottom: 18px; }
+        .media-upload-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            align-items: end;
+            margin: 18px 0 25px;
+        }
+        .media-upload-form label { display: block; color: #cbd5e1; font-size: 13px; margin-bottom: 7px; }
+        .media-upload-form input, .media-upload-form select {
+            width: 100%; padding: 11px; border-radius: 9px;
+            border: 1px solid #35415d; background: #0b1020; color: white;
+        }
+        .media-upload-form button, .media-delete-btn {
+            border: 0; border-radius: 9px; padding: 12px 16px;
+            background: #3478f6; color: white; font-weight: bold; cursor: pointer;
+        }
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+        .media-card { overflow: hidden; border: 1px solid #26314d; border-radius: 13px; background: #0e1629; }
+        .media-card img, .media-card video { display: block; width: 100%; height: 180px; object-fit: cover; background: #050914; }
+        .media-info { padding: 12px; color: #cbd5e1; font-size: 13px; }
+        .media-caption { margin: 7px 0; color: white; overflow-wrap: anywhere; }
+        .media-delete-form { padding: 0 12px 12px; }
+        .media-delete-btn { background: #b93848; padding: 8px 12px; }
+        .media-notice { margin: 12px 0; padding: 12px; border-radius: 9px; background: #1d3558; color: #dbeafe; }
+        @media (max-width: 600px) { .media-section { padding: 18px; } }
+
     </style>
 
 </head>
@@ -453,30 +490,30 @@
         </div>
 
         <h1>
-            {{ college[1] }}
+            {{ college.name }}
         </h1>
 
         <div class="location">
-            📍 {{ college[2] }}, {{ college[3] }}
+            📍 {{ college.city }}, {{ college.state }}
         </div>
 
         <p class="description">
-            {{ college[4] }}
+            {{ college.description }}
         </p>
         <div class="college-rating">
 
     <span class="rating">
-        ⭐ {{ college[6] }}
+        ⭐ {{ ratings.overall }}
     </span>
 
     <span class="review-count">
-        📝 {{ college[5] }} reviews
+        📝 {{ ratings.total_reviews }} reviews
     </span>
 
 </div>
 
 <div class="recommendation">
-    👍 {{ college[7] }}% students recommend
+    👍 {{ ratings.recommend_percentage }}% students recommend
 </div>
 
     </div>
@@ -611,7 +648,7 @@
         </p>
 
         <form
-            action="/college/{{ college[0] }}/review"
+            action="/college/{{ college.id }}/review"
             method="POST"
         >
 
@@ -756,6 +793,74 @@
     {% endif %}
 
 
+    <!-- COLLEGE MEDIA GALLERY -->
+    <section class="media-section">
+        <h2>📸 College Media Gallery</h2>
+        <p class="media-help">Photos and videos shared by registered students. Images: JPG, JPEG, PNG, WEBP (up to 10 MB). Videos: MP4, MOV, WEBM (up to 50 MB).</p>
+
+        {% if request.args.get('uploaded') %}
+            <div class="media-notice">Your media was uploaded successfully.</div>
+        {% elif error == 'cloudinary_not_configured' %}
+            <div class="media-notice">Media uploads are not configured yet. Please contact the site administrator.</div>
+        {% elif error %}
+            <div class="media-notice">We couldn't complete that media action. Please check the file, size and permissions, then try again.</div>
+        {% endif %}
+
+        {% if logged_in and not session.get('is_admin') %}
+        <form class="media-upload-form" action="{{ url_for('upload_college_media', college_id=college.id) }}" method="POST" enctype="multipart/form-data">
+            <div>
+                <label for="media_file">Choose photo or video</label>
+                <input id="media_file" type="file" name="media_file" accept=".jpg,.jpeg,.png,.webp,.mp4,.mov,.webm" required>
+            </div>
+            <div>
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    {% for category in media_categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="caption">Caption (optional)</label>
+                <input id="caption" type="text" name="caption" maxlength="500" placeholder="Add a short caption">
+            </div>
+            <button type="submit">Upload Media</button>
+        </form>
+        {% elif not logged_in %}
+            <p class="media-help"><a href="{{ url_for('login') }}">Log in as a student</a> to upload photos and videos.</p>
+        {% endif %}
+
+        {% if media_items %}
+        <div class="media-grid">
+            {% for item in media_items %}
+            <article class="media-card">
+                {% if item.media_type == 'image' %}
+                    <a href="{{ item.media_url }}" target="_blank" rel="noopener"><img src="{{ item.media_url }}" alt="{{ item.category }} at {{ college.name }}" loading="lazy"></a>
+                {% else %}
+                    <video controls preload="metadata">
+                        <source src="{{ item.media_url }}">
+                        Your browser does not support video playback.
+                    </video>
+                {% endif %}
+                <div class="media-info">
+                    <strong>{{ item.category }}</strong>
+                    {% if item.caption %}<div class="media-caption">{{ item.caption }}</div>{% endif %}
+                    <div>Shared by {{ item.anonymous_name }} · {{ item.created_at.strftime('%d %b %Y') if item.created_at else '' }}</div>
+                </div>
+                {% if logged_in and not session.get('is_admin') and item.user_id == session.get('user_id') %}
+                <form class="media-delete-form" action="{{ url_for('delete_college_media', media_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this media permanently?');">
+                    <button class="media-delete-btn" type="submit">Delete my media</button>
+                </form>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="media-help">No photos or videos have been shared for this college yet.</p>
+        {% endif %}
+    </section>
+
+
     <!-- STUDENT REVIEWS -->
 
     <div class="reviews-section">
@@ -772,23 +877,23 @@
             <div class="review-card">
 
                 <div class="review-title">
-                    {{ review[1] }}
+                    {{ review.title }}
                 </div>
 
 
                 <div class="review-author">
-                    👤 {{ review[13] }}
+                    👤 {{ review.anonymous_name }}
                 </div>
 
 
                 <!-- EDIT / DELETE ONLY FOR OWNER -->
 
-                {% if logged_in and review[14] == session.get("user_id") %}
+                {% if logged_in and review.user_id == session.get("user_id") %}
 
                 <div class="review-actions">
 
                     <a
-                        href="{{ url_for('edit_review', review_id=review[0]) }}"
+                        href="{{ url_for('edit_review', review_id=review.id) }}"
                         class="edit-btn"
                     >
                         ✏️ Edit Review
@@ -796,7 +901,7 @@
 
 
                     <form
-                        action="{{ url_for('delete_review', review_id=review[0]) }}"
+                        action="{{ url_for('delete_review', review_id=review.id) }}"
                         method="POST"
                         style="display: inline;"
                         onsubmit="return confirm('Are you sure you want to delete this review?');"
@@ -817,7 +922,7 @@
 
 
                 <div class="review-text">
-                    {{ review[2] }}
+                    {{ review.review_text }}
                 </div>
 
 
@@ -826,63 +931,63 @@
                     <div class="rating-box">
                         Teaching
                         <strong>
-                            {{ review[3] }}/5
+                            {{ review.teaching }}/5
                         </strong>
                     </div>
 
                     <div class="rating-box">
                         Placements
                         <strong>
-                            {{ review[4] }}/5
+                            {{ review.placements }}/5
                         </strong>
                     </div>
 
                     <div class="rating-box">
                         Infrastructure
                         <strong>
-                            {{ review[5] }}/5
+                            {{ review.infrastructure }}/5
                         </strong>
                     </div>
 
                     <div class="rating-box">
                         Faculty
                         <strong>
-                            {{ review[6] }}/5
+                            {{ review.faculty }}/5
                         </strong>
                     </div>
 
                     <div class="rating-box">
                         Campus Life
                         <strong>
-                            {{ review[7] }}/5
+                            {{ review.campus_life }}/5
                         </strong>
                     </div>
 
                     <div class="rating-box">
                         Hostel
                         <strong>
-                            {{ review[8] }}/5
+                            {{ review.hostel }}/5
                         </strong>
                     </div>
 
                     <div class="rating-box">
                         Canteen
                         <strong>
-                            {{ review[9] }}/5
+                            {{ review.canteen }}/5
                         </strong>
                     </div>
 
                     <div class="rating-box">
                         Overall
                         <strong>
-                            {{ review[10] }}/5
+                            {{ review.overall }}/5
                         </strong>
                     </div>
 
                 </div>
 
 
-                {% if review[11] == 1 %}
+                {% if review.recommend == 1 %}
 
                 <div class="recommend">
                     👍 Recommended by this student
