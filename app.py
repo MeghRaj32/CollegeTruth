@@ -9,6 +9,9 @@ from urllib.parse import urlparse
 from email.message import EmailMessage
 
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+import cloudinary
+import cloudinary.uploader
 
 
 # =========================================================
@@ -18,6 +21,31 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 
 app.secret_key = config.SECRET_KEY
+
+# Cloudinary configuration (credentials are read from environment/config.py).
+cloudinary.config(
+    cloud_name=getattr(config, "CLOUDINARY_CLOUD_NAME", ""),
+    api_key=getattr(config, "CLOUDINARY_API_KEY", ""),
+    api_secret=getattr(config, "CLOUDINARY_API_SECRET", ""),
+    secure=True
+)
+
+ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
+ALLOWED_VIDEO_EXTENSIONS = {"mp4", "mov", "webm"}
+ALLOWED_MEDIA_CATEGORIES = {
+    "Campus", "Classrooms", "Labs", "Library", "Hostel",
+    "Canteen", "Sports", "Infrastructure", "Other"
+}
+MAX_IMAGE_SIZE = 10 * 1024 * 1024
+MAX_VIDEO_SIZE = 50 * 1024 * 1024
+
+
+def cloudinary_is_configured():
+    return all([
+        getattr(config, "CLOUDINARY_CLOUD_NAME", ""),
+        getattr(config, "CLOUDINARY_API_KEY", ""),
+        getattr(config, "CLOUDINARY_API_SECRET", "")
+    ])
 
 @app.route("/suggest-college", methods=["GET", "POST"])
 def suggest_college():
@@ -264,6 +292,28 @@ def ensure_schema():
                     ALTER TABLE colleges
                     ADD COLUMN verified_at DATETIME NULL
                 """)
+
+            # -------------------------------------------------
+            # COLLEGE MEDIA GALLERY
+            # -------------------------------------------------
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS college_media (
+                    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    college_id INT NOT NULL,
+                    user_id INT NOT NULL,
+                    review_id INT NULL,
+                    media_url VARCHAR(1000) NOT NULL,
+                    public_id VARCHAR(255) NOT NULL,
+                    media_type VARCHAR(10) NOT NULL,
+                    category VARCHAR(40) NOT NULL,
+                    caption VARCHAR(500) NULL,
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (id),
+                    INDEX idx_college_media_college (college_id),
+                    INDEX idx_college_media_user (user_id),
+                    INDEX idx_college_media_created (created_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """)
 
         connection.commit()
 
@@ -690,9 +740,7 @@ def search():
 # COLLEGE PROFILE
 # =========================================================
 
-@app.route(
-    "/college/<int:college_id>"
-)
+@app.route("/college/<int:college_id>")
 def college_profile(college_id):
 
     connection = get_db_connection()
@@ -702,37 +750,25 @@ def college_profile(college_id):
         with connection.cursor() as cursor:
 
             # -------------------------------------------------
-            # COLLEGE
+            # COLLEGE DETAILS
             # -------------------------------------------------
 
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT *
                 FROM colleges
                 WHERE id = %s
-                """,
-                (
-                    college_id,
-                )
-            )
+            """, (college_id,))
 
             college = cursor.fetchone()
 
-
             if college is None:
-
-                return (
-                    "College not found",
-                    404
-                )
-
+                return "College not found", 404
 
             # -------------------------------------------------
             # REVIEWS
             # -------------------------------------------------
 
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT
                     reviews.id,
                     reviews.title,
@@ -758,51 +794,39 @@ def college_profile(college_id):
                 WHERE reviews.college_id = %s
 
                 ORDER BY reviews.created_at DESC
-                """,
-                (
-                    college_id,
-                )
-            )
+            """, (college_id,))
 
             reviews = cursor.fetchall()
-
 
             # -------------------------------------------------
             # RATINGS
             # -------------------------------------------------
 
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT
-                    COUNT(*),
-                    AVG(teaching),
-                    AVG(placements),
-                    AVG(infrastructure),
-                    AVG(faculty),
-                    AVG(campus_life),
-                    AVG(hostel),
-                    AVG(canteen),
-                    AVG(overall),
-                    AVG(recommend) * 100
+                    COUNT(*) AS total_reviews,
+                    AVG(teaching) AS teaching,
+                    AVG(placements) AS placements,
+                    AVG(infrastructure) AS infrastructure,
+                    AVG(faculty) AS faculty,
+                    AVG(campus_life) AS campus_life,
+                    AVG(hostel) AS hostel,
+                    AVG(canteen) AS canteen,
+                    AVG(overall) AS overall,
+                    AVG(recommend) * 100 AS recommend_percentage
 
                 FROM reviews
 
                 WHERE college_id = %s
-                """,
-                (
-                    college_id,
-                )
-            )
+            """, (college_id,))
 
             rating_data = cursor.fetchone()
 
-
             # -------------------------------------------------
-            # VERIFICATION
+            # VERIFICATION DETAILS
             # -------------------------------------------------
 
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT
                     verification_status,
                     verification_source,
@@ -814,83 +838,65 @@ def college_profile(college_id):
                 FROM colleges
 
                 WHERE id = %s
-                """,
-                (
-                    college_id,
-                )
-            )
+            """, (college_id,))
 
             verification = cursor.fetchone()
+
+            # -------------------------------------------------
+            # COLLEGE MEDIA GALLERY
+            # -------------------------------------------------
+            cursor.execute("""
+                SELECT
+                    college_media.id,
+                    college_media.college_id,
+                    college_media.user_id,
+                    college_media.media_url,
+                    college_media.public_id,
+                    college_media.media_type,
+                    college_media.category,
+                    college_media.caption,
+                    college_media.created_at,
+                    users.anonymous_name
+                FROM college_media
+                JOIN users ON college_media.user_id = users.id
+                WHERE college_media.college_id = %s
+                ORDER BY college_media.created_at DESC
+            """, (college_id,))
+            media_items = cursor.fetchall()
 
     finally:
 
         connection.close()
 
-
     # ---------------------------------------------------------
     # RATINGS OBJECT
     # ---------------------------------------------------------
 
-    if rating_data and rating_data[0] > 0:
+    if rating_data and rating_data["total_reviews"] > 0:
 
         ratings = {
 
-            "total_reviews":
-                rating_data[0],
+            "total_reviews": rating_data["total_reviews"],
 
-            "teaching":
-                round(
-                    float(rating_data[1]),
-                    1
-                ),
+            "teaching": round(float(rating_data["teaching"] or 0), 1),
 
-            "placements":
-                round(
-                    float(rating_data[2]),
-                    1
-                ),
+            "placements": round(float(rating_data["placements"] or 0), 1),
 
-            "infrastructure":
-                round(
-                    float(rating_data[3]),
-                    1
-                ),
+            "infrastructure": round(float(rating_data["infrastructure"] or 0), 1),
 
-            "faculty":
-                round(
-                    float(rating_data[4]),
-                    1
-                ),
+            "faculty": round(float(rating_data["faculty"] or 0), 1),
 
-            "campus_life":
-                round(
-                    float(rating_data[5]),
-                    1
-                ),
+            "campus_life": round(float(rating_data["campus_life"] or 0), 1),
 
-            "hostel":
-                round(
-                    float(rating_data[6]),
-                    1
-                ),
+            "hostel": round(float(rating_data["hostel"] or 0), 1),
 
-            "canteen":
-                round(
-                    float(rating_data[7]),
-                    1
-                ),
+            "canteen": round(float(rating_data["canteen"] or 0), 1),
 
-            "overall":
-                round(
-                    float(rating_data[8]),
-                    1
-                ),
+            "overall": round(float(rating_data["overall"] or 0), 1),
 
-            "recommend_percentage":
-                round(
-                    float(rating_data[9]),
-                    1
-                )
+            "recommend_percentage": round(
+                float(rating_data["recommend_percentage"] or 0), 1
+            )
         }
 
     else:
@@ -909,82 +915,198 @@ def college_profile(college_id):
             "recommend_percentage": 0
         }
 
+    # ---------------------------------------------------------
+    # VERIFICATION OBJECT
+    # ---------------------------------------------------------
 
     if verification:
 
-        verification_status = (
-            verification[0]
-        )
+        verification_status = verification["verification_status"]
 
-        verification_source = (
-            verification[1]
-        )
+        verification_source = verification["verification_source"]
 
-        verification_source_url = (
-            verification[2]
-        )
+        verification_source_url = verification["verification_source_url"]
 
-        verification_notes = (
-            verification[3]
-        )
+        verification_notes = verification["verification_notes"]
 
-        verified_at = (
-            verification[4]
-        )
+        verified_at = verification["verified_at"]
 
-        verification_level = (
-            verification[5]
-        )
+        verification_level = verification["verification_level"]
 
     else:
 
         verification_status = "unverified"
-
         verification_source = None
-
         verification_source_url = None
-
         verification_notes = None
-
         verified_at = None
-
         verification_level = 0
 
+    # ---------------------------------------------------------
+    # ERROR MESSAGE
+    # ---------------------------------------------------------
 
-    error = request.args.get(
-        "error"
-    )
+    error = request.args.get("error")
 
+    # ---------------------------------------------------------
+    # RENDER COLLEGE PROFILE
+    # ---------------------------------------------------------
 
     return render_template(
         "college.html",
 
         college=college,
-
         reviews=reviews,
-
         ratings=ratings,
 
         logged_in="user_id" in session,
 
-        username=session.get(
-            "anonymous_name"
-        ),
+        username=session.get("anonymous_name"),
 
         error=error,
 
         verification_status=verification_status,
-
         verification_source=verification_source,
-
         verification_source_url=verification_source_url,
-
         verification_notes=verification_notes,
-
         verified_at=verified_at,
-
-        verification_level=verification_level
+        verification_level=verification_level,
+        media_items=media_items,
+        media_categories=sorted(ALLOWED_MEDIA_CATEGORIES)
     )
+
+
+
+# =========================================================
+# COLLEGE MEDIA UPLOAD / DELETE
+# =========================================================
+
+@app.route("/college/<int:college_id>/media/upload", methods=["POST"])
+def upload_college_media(college_id):
+    # Only signed-in student accounts may upload. Admin accounts are excluded.
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    if session.get("is_admin"):
+        return redirect(url_for("college_profile", college_id=college_id, error="student_upload_only"))
+    if not cloudinary_is_configured():
+        return redirect(url_for("college_profile", college_id=college_id, error="cloudinary_not_configured"))
+
+    uploaded_file = request.files.get("media_file")
+    if not uploaded_file or not uploaded_file.filename:
+        return redirect(url_for("college_profile", college_id=college_id, error="choose_file"))
+
+    original_name = secure_filename(uploaded_file.filename)
+    extension = original_name.rsplit(".", 1)[-1].lower() if "." in original_name else ""
+    if extension in ALLOWED_IMAGE_EXTENSIONS:
+        media_type = "image"
+        max_size = MAX_IMAGE_SIZE
+        allowed_mimes = {"image/jpeg", "image/png", "image/webp"}
+    elif extension in ALLOWED_VIDEO_EXTENSIONS:
+        media_type = "video"
+        max_size = MAX_VIDEO_SIZE
+        allowed_mimes = {"video/mp4", "video/quicktime", "video/webm"}
+    else:
+        return redirect(url_for("college_profile", college_id=college_id, error="invalid_file_type"))
+
+    # Read once to enforce the per-file limit before sending to Cloudinary.
+    file_bytes = uploaded_file.read(max_size + 1)
+    if not file_bytes:
+        return redirect(url_for("college_profile", college_id=college_id, error="empty_file"))
+    if len(file_bytes) > max_size:
+        return redirect(url_for("college_profile", college_id=college_id, error="file_too_large"))
+    if uploaded_file.mimetype not in allowed_mimes:
+        return redirect(url_for("college_profile", college_id=college_id, error="invalid_mime_type"))
+
+    category = request.form.get("category", "Other").strip()
+    if category not in ALLOWED_MEDIA_CATEGORIES:
+        return redirect(url_for("college_profile", college_id=college_id, error="invalid_category"))
+    caption = request.form.get("caption", "").strip()[:500] or None
+
+    connection = get_db_connection()
+    uploaded_public_id = None
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM colleges WHERE id = %s", (college_id,))
+            if cursor.fetchone() is None:
+                return "College not found", 404
+
+        cloud_result = cloudinary.uploader.upload(
+            file_bytes,
+            resource_type=media_type,
+            folder=f"collegetruth/colleges/{college_id}",
+            allowed_formats=sorted(ALLOWED_IMAGE_EXTENSIONS if media_type == "image" else ALLOWED_VIDEO_EXTENSIONS)
+        )
+        uploaded_public_id = cloud_result.get("public_id")
+        media_url = cloud_result.get("secure_url")
+        if not uploaded_public_id or not media_url:
+            raise RuntimeError("Cloudinary did not return the uploaded media details.")
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO college_media
+                    (college_id, user_id, media_url, public_id, media_type, category, caption)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                college_id, session["user_id"], media_url, uploaded_public_id,
+                media_type, category, caption
+            ))
+        connection.commit()
+        return redirect(url_for("college_profile", college_id=college_id, uploaded="1"))
+
+    except Exception as error:
+        connection.rollback()
+        print("College media upload error:", error)
+        # Avoid orphaned Cloudinary assets if the database insert fails.
+        if uploaded_public_id:
+            try:
+                cloudinary.uploader.destroy(uploaded_public_id, resource_type=media_type)
+            except Exception as cleanup_error:
+                print("Cloudinary cleanup error:", cleanup_error)
+        return redirect(url_for("college_profile", college_id=college_id, error="upload_failed"))
+    finally:
+        connection.close()
+
+
+@app.route("/college/media/<int:media_id>/delete", methods=["POST"])
+def delete_college_media(media_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    if session.get("is_admin"):
+        return redirect(url_for("home"))
+
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, college_id, user_id, public_id, media_type
+                FROM college_media
+                WHERE id = %s
+            """, (media_id,))
+            media = cursor.fetchone()
+
+        if not media:
+            return redirect(url_for("home"))
+        if media["user_id"] != session["user_id"]:
+            return redirect(url_for("college_profile", college_id=media["college_id"], error="not_media_owner"))
+
+        # Delete from Cloudinary first; keep the DB row if Cloudinary rejects it.
+        destroy_result = cloudinary.uploader.destroy(
+            media["public_id"], resource_type=media["media_type"]
+        )
+        if destroy_result.get("result") not in {"ok", "not found"}:
+            raise RuntimeError("Cloudinary could not delete this media asset.")
+
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM college_media WHERE id = %s AND user_id = %s", (media_id, session["user_id"]))
+        connection.commit()
+        return redirect(url_for("college_profile", college_id=media["college_id"], deleted="1"))
+
+    except Exception as error:
+        connection.rollback()
+        print("College media delete error:", error)
+        return redirect(url_for("home"))
+    finally:
+        connection.close()
 
 
 # =========================================================
@@ -2147,7 +2269,7 @@ def login():
 
 
         if not check_password_hash(
-            user[2],
+            user["password_hash"],
             password
         ):
 
@@ -2166,13 +2288,13 @@ def login():
 
         session.clear()
 
-        session["user_id"] = user[0]
+        session["user_id"] = user["id"]
 
-        session["email"] = user[1]
+        session["email"] = user["email"]
 
-        session["anonymous_name"] = user[3]
+        session["anonymous_name"] = user["anonymous_name"]
 
-        session["is_admin"] = bool(user[4])
+        session["is_admin"] = bool(user["is_admin"])
 
 
         return redirect(
@@ -3061,17 +3183,6 @@ def admin_delete_review(review_id):
 def logout():
     session.clear()
     return redirect(url_for("home"))
-
-
-# =========================================================
-# STARTUP
-# =========================================================
-
-if __name__ == "__main__":
-    # Keep your existing startup code here.
-    # Do not replace it with this comment.
-    ...
-
 
 
 # =========================================================
