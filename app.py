@@ -2,17 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
 import config
 import os
-print("========== RENDER ENVIRONMENT TEST ==========")
-
-print("OS Cloud Name:", bool(os.getenv("CLOUDINARY_CLOUD_NAME")))
-print("OS API Key:", bool(os.getenv("CLOUDINARY_API_KEY")))
-print("OS API Secret:", bool(os.getenv("CLOUDINARY_API_SECRET")))
-
-print("Config Cloud Name:", bool(config.CLOUDINARY_CLOUD_NAME))
-print("Config API Key:", bool(config.CLOUDINARY_API_KEY))
-print("Config API Secret:", bool(config.CLOUDINARY_API_SECRET))
-
-print("=============================================")
+print("========== CONFIG FILE CHECK ==========")
+print("Loaded config file:", config.__file__)
+print("Cloud name type:", type(config.CLOUDINARY_CLOUD_NAME))
+print("Cloud name present:", bool(config.CLOUDINARY_CLOUD_NAME))
+print("API key present:", bool(config.CLOUDINARY_API_KEY))
+print("API secret present:", bool(config.CLOUDINARY_API_SECRET))
+print("=======================================")
 import random
 import time
 import smtplib
