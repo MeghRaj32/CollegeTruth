@@ -504,6 +504,9 @@
                     <div class="college-info">
                         <div class="college-title-row">
                             <h3>{{ college['name'] }}</h3>
+                            <p style="color: yellow;">
+    Debug College ID: {{ college.get('id', 'ID MISSING') }}
+</p>
 
                             {% set verification_status = college.get('verification_status', '')|string|trim|lower %}
 
@@ -534,9 +537,9 @@
                             {{ college.get('description', '') }}
                         </p>
 
-                        <a href="/college/{{ college['id'] }}">
-                            <button type="button">View College</button>
-                        </a>
+                        <a href="{{ url_for('college_profile', college_id=college['id']) }}">
+    <button type="button">View College</button>
+</a>
                     </div>
                 </div>
             {% else %}

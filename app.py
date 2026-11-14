@@ -1,6 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
 import config
+print("========== CLOUDINARY DIAGNOSTIC ==========")
+
+print("Cloud name loaded:",
+      bool(config.CLOUDINARY_CLOUD_NAME))
+
+print("API key loaded:",
+      bool(config.CLOUDINARY_API_KEY))
+
+print("API secret loaded:",
+      bool(config.CLOUDINARY_API_SECRET))
+
+print("===========================================")
 import random
 import time
 import smtplib

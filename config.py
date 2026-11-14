@@ -34,13 +34,7 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 # COLLEGETRUTH SECURITY
 # =========================================================
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-
-if not SECRET_KEY:
-    raise RuntimeError(
-        "SECRET_KEY is not configured. Set it in your environment."
-    )
-
+SECRET_KEY = os.getenv("SECRET_KEY", "college-truth-local-dev-key-2026")
 # =========================================================
 # COLLEGETRUTH AI SETTINGS
 # =========================================================
@@ -54,3 +48,13 @@ OPENAI_API_KEY = os.getenv(
     "OPENAI_API_KEY",
     ""
 )
+
+# =========================================================
+# CLOUDINARY MEDIA STORAGE
+# =========================================================
+
+
+
+CLOUDINARY_CLOUD_NAME = os.getenv("ztkp67ao", "")
+CLOUDINARY_API_KEY = os.getenv("885582565293157", "")
+CLOUDINARY_API_SECRET = os.getenv("TrukYuCJl5x_nnUIcN3YhXSH3ao", "")
